@@ -1,0 +1,338 @@
+You are a Senior Product Designer, Senior Frontend Architect, and Startup-level UX Expert.
+
+Build a modern, premium, animation-rich web application for a hackathon event organized by JCI Sousse.
+
+Project Name:
+Hack Tank
+
+Organization:
+JCI Sousse
+
+Tech Stack:
+- React
+- TypeScript
+- Vite
+- TailwindCSS
+- Framer Motion
+- React Hook Form
+- Zod Validation
+- React Router
+- Shadcn/ui
+- Lucide Icons
+
+Objective:
+Create a world-class hackathon landing page and registration experience with startup-quality design standards.
+
+====================================================
+BRANDING
+====================================================
+
+Create a visual identity inspired by JCI Sousse:
+
+Primary Colors:
+- JCI Blue (#0057B8)
+- Deep Navy (#0C2340)
+
+Secondary Colors:
+- Gold Accent (#F4B400)
+- White
+- Light Gray
+
+Style:
+- Modern
+- Innovative
+- Tech Startup
+- Premium
+- Energetic
+- Professional
+- Youth-oriented
+
+Design Inspiration:
+- Apple
+- Stripe
+- Linear
+- Vercel
+- Notion
+- GitHub Universe
+- Web Summit
+
+====================================================
+HOME PAGE
+====================================================
+
+Create a stunning landing page containing:
+
+1. Hero Section
+- Full-screen hero
+- Animated background
+- Dynamic particles
+- Smooth gradients
+- Glassmorphism effects
+- 3D floating shapes
+- Animated Hack Tank logo
+- Catchphrase
+
+Examples:
+"Where Ideas Become Startups"
+"Innovate. Build. Impact."
+
+CTA:
+- Register Now
+- Learn More
+
+2. Event Overview
+- Event description
+- Goals
+- Why participate
+- Benefits
+
+3. Statistics Section
+Animated counters:
+- Participants
+- Teams
+- Mentors
+- Sponsors
+- Prize Pool
+
+4. Timeline
+Interactive vertical timeline:
+
+- Registration Open
+- Team Formation
+- Mentoring Phase
+- Hackathon Day
+- Jury Evaluation
+- Awards Ceremony
+
+5. Tracks Section
+
+Beautiful animated cards:
+
+- AI
+- Fintech
+- Sustainability
+- Smart Cities
+- Education
+- Open Innovation
+
+Hover interactions required.
+
+6. Prizes Section
+
+Showcase prizes with:
+
+- Gold
+- Silver
+- Bronze
+
+Animated reward cards.
+
+7. Mentors & Jury
+
+Professional speaker cards:
+- photo
+- role
+- company
+- LinkedIn
+
+Elegant animations.
+
+8. Sponsors
+
+Infinite logo carousel.
+
+9. FAQ Section
+
+Animated accordion.
+
+10. Footer
+
+- Social networks
+- Contact
+- JCI Sousse links
+
+====================================================
+REGISTRATION EXPERIENCE
+====================================================
+
+Create a dedicated registration flow.
+
+Step 1
+Participant Information
+
+Fields:
+- First Name
+- Last Name
+- Email
+- Phone
+- Age
+- City
+- Country
+
+Step 2
+Professional Background
+
+Fields:
+- University
+- Company
+- Position
+- Experience Level
+
+Step 3
+Skills
+
+Multi-select:
+- Frontend
+- Backend
+- DevOps
+- Mobile
+- UI/UX
+- Data Science
+- AI
+- Product Management
+- Marketing
+- Business
+
+Step 4
+Project Information
+
+Fields:
+- Team Name
+- Project Idea
+- Problem Statement
+- Solution Description
+- Technology Stack
+
+Step 5
+Final Review
+
+Summary page.
+
+Step 6
+Success Page
+
+High-quality celebration animation.
+
+====================================================
+ANIMATIONS
+====================================================
+
+Use Framer Motion extensively:
+
+- Scroll reveals
+- Stagger animations
+- Glass hover effects
+- Magnetic buttons
+- Animated gradients
+- Floating elements
+- Scroll progress bar
+- Section transitions
+- Micro-interactions everywhere
+
+Make the website feel alive.
+
+====================================================
+ADVANCED UX FEATURES
+====================================================
+
+Add:
+
+- Dark mode
+- Light mode
+- Mobile-first design
+- Fully responsive
+- Accessible components
+- Loading skeletons
+- Smooth scrolling
+- Back-to-top button
+
+====================================================
+INNOVATIVE FEATURES
+====================================================
+
+Include:
+
+1. AI-inspired animated background
+
+2. Team Matchmaking Section
+
+"Find your future teammates"
+
+Filter by:
+- Skills
+- Interests
+- Experience
+
+3. Startup Idea Wall
+
+Display innovation ideas as animated cards.
+
+4. Live Countdown
+
+Days
+Hours
+Minutes
+Seconds
+
+Until event start.
+
+5. Impact Section
+
+Display:
+- Future entrepreneurs
+- Innovation ecosystem
+- Community impact
+
+6. Interactive Network Visualization
+
+Show participants, mentors and teams connected visually.
+
+====================================================
+DEVELOPMENT REQUIREMENTS
+====================================================
+
+Generate:
+
+- Complete project architecture
+- Folder structure
+- Clean components hierarchy
+- Reusable components
+- Custom hooks
+- TypeScript types
+- Constants folder
+- Assets management
+
+Use:
+
+components/
+pages/
+layouts/
+hooks/
+services/
+types/
+constants/
+data/
+animations/
+
+====================================================
+QUALITY EXPECTATIONS
+====================================================
+
+The final UI should look like:
+
+- A premium SaaS product
+- A startup landing page
+- A modern conference website
+- Award-winning design quality
+
+Avoid generic hackathon templates.
+
+Prioritize:
+- Visual wow effect
+- Excellent UX
+- High performance
+- Clean architecture
+- Reusable code
+- Beautiful animations
+
+Generate the complete frontend architecture before implementing pages.

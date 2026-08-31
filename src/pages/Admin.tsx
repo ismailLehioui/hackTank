@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
 import { Download, RefreshCw, Trash2 } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import type { RegistrationData } from '../types'
 
 const LIST_KEY = 'hacktank-registration-list'
+const AUTH_KEY = 'hacktank-admin-auth'
+// Client-side gate only. Set VITE_ADMIN_PASSWORD in a .env file to override the default.
+const ADMIN_PASSWORD = (import.meta.env.VITE_ADMIN_PASSWORD as string | undefined) || 'hacktank2025'
 
 type Submission = RegistrationData & { submittedAt: string }
 
@@ -42,8 +46,28 @@ function toCsvCell(value: unknown): string {
 }
 
 export function Admin() {
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem(AUTH_KEY) === 'true')
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState(false)
   const [submissions, setSubmissions] = useState<Submission[]>(loadSubmissions)
   const [query, setQuery] = useState('')
+
+  const login = (e: FormEvent) => {
+    e.preventDefault()
+    if (password === ADMIN_PASSWORD) {
+      sessionStorage.setItem(AUTH_KEY, 'true')
+      setAuthed(true)
+      setAuthError(false)
+    } else {
+      setAuthError(true)
+    }
+  }
+
+  const logout = () => {
+    sessionStorage.removeItem(AUTH_KEY)
+    setAuthed(false)
+    setPassword('')
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -77,6 +101,29 @@ export function Admin() {
     setSubmissions([])
   }
 
+  if (!authed) {
+    return (
+      <div className="admin-login">
+        <form onSubmit={login} className="admin-login-card">
+          <Brand />
+          <div className="section-label">/ ADMIN ACCESS</div>
+          <h1>Restricted<br /><span>area.</span></h1>
+          <p>Enter the organizer password to view registrations.</p>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            autoFocus
+            className={authError ? 'error' : ''}
+          />
+          {authError && <span className="field-error">Wrong password. Try again.</span>}
+          <button className="primary" type="submit">Unlock <span>↗</span></button>
+        </form>
+      </div>
+    )
+  }
+
   return (
     <div className="admin-page">
       <header className="admin-nav">
@@ -86,6 +133,7 @@ export function Admin() {
           <button onClick={refresh} className="admin-btn"><RefreshCw size={15} /> Refresh</button>
           <button onClick={exportCsv} className="admin-btn primary-btn" disabled={submissions.length === 0}><Download size={15} /> Export CSV</button>
           <button onClick={clearAll} className="admin-btn danger" disabled={submissions.length === 0}><Trash2 size={15} /> Clear</button>
+          <button onClick={logout} className="admin-btn">Logout</button>
         </div>
       </header>
 

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "generate:presentation": "node scripts/generate-presentation.mjs"
+    "generate:presentation": "node scripts/generate-presentation.mjs",
+    "generate:interface-brief": "node scripts/generate-interface-brief.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

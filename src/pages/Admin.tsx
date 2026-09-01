@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Download, LogOut, RefreshCw, Users } from 'lucide-react'
 import { Brand } from '../components/Brand'
-import { getDashboardStats, getParticipants, isSupabaseConfigured, type DashboardStats, type ParticipantRecord } from '../services/registrations'
+import { getCurrentUserRole, getDashboardStats, getParticipants, isSupabaseConfigured, type DashboardStats, type ParticipantRecord } from '../services/registrations'
 import { supabase } from '../services/supabase'
 
 const EMPTY_STATS: DashboardStats = { participants: 0, teams: 0, projects: 0, mentors: 0, jury: 0, sponsors: 0 }
@@ -27,6 +27,8 @@ export function Admin() {
     setLoading(true)
     setDataError('')
     try {
+      const role = await getCurrentUserRole()
+      if (role !== 'admin') throw new Error('This account is not an organizer account. Ask an admin to assign it the admin role in Supabase.')
       const [nextStats, nextRecords] = await Promise.all([getDashboardStats(), getParticipants()])
       setStats(nextStats)
       setRecords(nextRecords)

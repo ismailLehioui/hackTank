@@ -81,4 +81,14 @@ export async function getParticipants(): Promise<ParticipantRecord[]> {
   return data as ParticipantRecord[]
 }
 
+export async function getCurrentUserRole() {
+  if (!supabase) throw new Error('Supabase is not configured')
+  const { data: userData, error: userError } = await supabase.auth.getUser()
+  if (userError || !userData.user) throw new Error('Your session has expired. Please sign in again.')
+
+  const { data, error } = await supabase.from('profiles').select('role').eq('id', userData.user.id).single()
+  if (error) throw error
+  return data.role as string
+}
+
 export { isSupabaseConfigured }

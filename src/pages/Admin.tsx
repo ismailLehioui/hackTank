@@ -1,44 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Download, RefreshCw, Trash2 } from 'lucide-react'
+import { Download, LogOut, RefreshCw, Users } from 'lucide-react'
 import { Brand } from '../components/Brand'
-import type { RegistrationData } from '../types'
+import { getDashboardStats, getParticipants, isSupabaseConfigured, type DashboardStats, type ParticipantRecord } from '../services/registrations'
+import { supabase } from '../services/supabase'
 
-const LIST_KEY = 'hacktank-registration-list'
-const AUTH_KEY = 'hacktank-admin-auth'
-// Client-side gate only. Set VITE_ADMIN_PASSWORD in a .env file to override the default.
-const ADMIN_PASSWORD = (import.meta.env.VITE_ADMIN_PASSWORD as string | undefined) || 'hacktank2025'
-
-type Submission = RegistrationData & { submittedAt: string }
-
-function loadSubmissions(): Submission[] {
-  try {
-    return JSON.parse(localStorage.getItem(LIST_KEY) || '[]')
-  } catch {
-    return []
-  }
-}
-
-const CSV_COLUMNS: { key: keyof Submission; label: string }[] = [
-  { key: 'submittedAt', label: 'Submitted at' },
-  { key: 'firstName', label: 'First name' },
-  { key: 'lastName', label: 'Last name' },
-  { key: 'email', label: 'Email' },
-  { key: 'phone', label: 'Phone' },
-  { key: 'age', label: 'Age' },
-  { key: 'city', label: 'City' },
-  { key: 'country', label: 'Country' },
-  { key: 'university', label: 'University' },
-  { key: 'company', label: 'Company' },
-  { key: 'position', label: 'Position' },
-  { key: 'experience', label: 'Experience' },
-  { key: 'skills', label: 'Skills' },
-  { key: 'hasTeam', label: 'Team' },
-  { key: 'teamName', label: 'Team name' },
-  { key: 'track', label: 'Track' },
-  { key: 'idea', label: 'Idea' },
-  { key: 'problem', label: 'Problem' },
-]
+const EMPTY_STATS: DashboardStats = { participants: 0, teams: 0, projects: 0, mentors: 0, jury: 0, sponsors: 0 }
 
 function toCsvCell(value: unknown): string {
   const text = Array.isArray(value) ? value.join(' | ') : String(value ?? '')
@@ -46,157 +13,173 @@ function toCsvCell(value: unknown): string {
 }
 
 export function Admin() {
-  const [authed, setAuthed] = useState(() => sessionStorage.getItem(AUTH_KEY) === 'true')
+  const [authenticated, setAuthenticated] = useState(false)
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [authError, setAuthError] = useState(false)
-  const [submissions, setSubmissions] = useState<Submission[]>(loadSubmissions)
+  const [authError, setAuthError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [records, setRecords] = useState<ParticipantRecord[]>([])
+  const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS)
   const [query, setQuery] = useState('')
+  const [dataError, setDataError] = useState('')
 
-  const login = (e: FormEvent) => {
-    e.preventDefault()
-    if (password === ADMIN_PASSWORD) {
-      sessionStorage.setItem(AUTH_KEY, 'true')
-      setAuthed(true)
-      setAuthError(false)
-    } else {
-      setAuthError(true)
+  const loadDashboard = async () => {
+    setLoading(true)
+    setDataError('')
+    try {
+      const [nextStats, nextRecords] = await Promise.all([getDashboardStats(), getParticipants()])
+      setStats(nextStats)
+      setRecords(nextRecords)
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to load dashboard data.')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const logout = () => {
-    sessionStorage.removeItem(AUTH_KEY)
-    setAuthed(false)
-    setPassword('')
-  }
+  useEffect(() => {
+    if (!supabase) return
+    supabase.auth.getSession().then(({ data }) => setAuthenticated(Boolean(data.session)))
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => setAuthenticated(Boolean(session)))
+    return () => listener.subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    if (authenticated) void loadDashboard()
+  }, [authenticated])
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return submissions
-    return submissions.filter((s) =>
-      [s.firstName, s.lastName, s.email, s.city, s.track, s.teamName]
+    const normalized = query.trim().toLowerCase()
+    if (!normalized) return records
+    return records.filter((record) =>
+      [record.first_name, record.last_name, record.email, record.city, record.experience_level, ...record.skills]
         .join(' ')
         .toLowerCase()
-        .includes(q),
+        .includes(normalized),
     )
-  }, [submissions, query])
+  }, [records, query])
 
-  const refresh = () => setSubmissions(loadSubmissions())
+  const login = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!supabase) return
+    setLoading(true)
+    setAuthError('')
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    setLoading(false)
+    if (error) setAuthError(error.message)
+  }
+
+  const logout = async () => {
+    await supabase?.auth.signOut()
+    setRecords([])
+    setStats(EMPTY_STATS)
+  }
 
   const exportCsv = () => {
-    const header = CSV_COLUMNS.map((col) => toCsvCell(col.label)).join(',')
-    const rows = submissions.map((s) => CSV_COLUMNS.map((col) => toCsvCell(s[col.key])).join(','))
-    const csv = [header, ...rows].join('\n')
+    const columns = [
+      ['created_at', 'Submitted at'], ['first_name', 'First name'], ['last_name', 'Last name'],
+      ['email', 'Email'], ['phone', 'Phone'], ['age', 'Age'], ['city', 'City'], ['country', 'Country'],
+      ['school', 'School'], ['company', 'Company'], ['position', 'Position'], ['experience_level', 'Experience'],
+      ['skills', 'Skills'], ['has_team', 'Has team'], ['looking_for_teammates', 'Looking for teammates'],
+    ] as const
+    const csv = [
+      columns.map(([, label]) => toCsvCell(label)).join(','),
+      ...records.map((record) => columns.map(([key]) => toCsvCell(record[key])).join(',')),
+    ].join('\n')
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `hacktank-registrations-${new Date().toISOString().slice(0, 10)}.csv`
+    link.download = `hacktank-participants-${new Date().toISOString().slice(0, 10)}.csv`
     link.click()
     URL.revokeObjectURL(url)
   }
 
-  const clearAll = () => {
-    if (!window.confirm('Delete all registrations stored in this browser? This cannot be undone.')) return
-    localStorage.removeItem(LIST_KEY)
-    setSubmissions([])
+  if (!isSupabaseConfigured) {
+    return <AdminNotice title="Supabase setup required" text="Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env, then restart the development server." />
   }
 
-  if (!authed) {
+  if (!authenticated) {
     return (
       <div className="admin-login">
         <form onSubmit={login} className="admin-login-card">
           <Brand />
-          <div className="section-label">/ ADMIN ACCESS</div>
-          <h1>Restricted<br /><span>area.</span></h1>
-          <p>Enter the organizer password to view registrations.</p>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            autoFocus
-            className={authError ? 'error' : ''}
-          />
-          {authError && <span className="field-error">Wrong password. Try again.</span>}
-          <button className="primary" type="submit">Unlock <span>↗</span></button>
+          <div className="section-label">/ ORGANIZER ACCESS</div>
+          <h1>Admin<br /><span>login.</span></h1>
+          <p>Sign in with the organizer account created in Supabase.</p>
+          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Organizer email" autoComplete="email" required />
+          <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password" autoComplete="current-password" required />
+          {authError && <span className="field-error" role="alert">{authError}</span>}
+          <button className="primary" type="submit" disabled={loading}>{loading ? 'Signing in...' : 'Unlock'} <span>↗</span></button>
         </form>
       </div>
     )
   }
 
+  const cards = [
+    ['Participants', stats.participants, 'Registered builders'], ['Teams', stats.teams, 'Teams in the Tank'],
+    ['Projects', stats.projects, 'Ventures submitted'], ['Mentors', stats.mentors, 'Mentors available'],
+    ['Jury', stats.jury, 'Sharks on the panel'], ['Sponsors', stats.sponsors, 'Supporting partners'],
+  ]
+
   return (
     <div className="admin-page">
       <header className="admin-nav">
         <Brand />
-        <span className="form-count">ADMIN / REGISTRATIONS</span>
+        <span className="form-count">ADMIN / DASHBOARD</span>
         <div className="admin-actions">
-          <button onClick={refresh} className="admin-btn"><RefreshCw size={15} /> Refresh</button>
-          <button onClick={exportCsv} className="admin-btn primary-btn" disabled={submissions.length === 0}><Download size={15} /> Export CSV</button>
-          <button onClick={clearAll} className="admin-btn danger" disabled={submissions.length === 0}><Trash2 size={15} /> Clear</button>
-          <button onClick={logout} className="admin-btn">Logout</button>
+          <button onClick={() => void loadDashboard()} className="admin-btn" disabled={loading}><RefreshCw size={15} /> Refresh</button>
+          <button onClick={exportCsv} className="admin-btn primary-btn" disabled={!records.length}><Download size={15} /> Export CSV</button>
+          <button onClick={() => void logout()} className="admin-btn"><LogOut size={15} /> Logout</button>
         </div>
       </header>
 
       <div className="admin-body">
         <div className="admin-head">
           <div>
-            <div className="section-label">/ REGISTRATIONS</div>
-            <h1>{submissions.length} <span>applicant{submissions.length === 1 ? '' : 's'}</span></h1>
+            <div className="section-label">/ EVENT CONTROL ROOM</div>
+            <h1>Hack Tank <span>dashboard.</span></h1>
           </div>
-          <input
-            className="admin-search"
-            placeholder="Search name, email, track…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+          <div className="admin-status"><Users size={16} /> {loading ? 'Syncing data...' : 'Live Supabase data'}</div>
         </div>
 
-        <p className="admin-note">
-          Registrations are stored in this browser only (localStorage). To collect entries from every
-          device once deployed, connect the form to a backend or a Google Sheet.
-        </p>
+        {dataError && <p className="admin-alert" role="alert">{dataError}</p>}
 
-        {submissions.length === 0 ? (
-          <div className="admin-empty">
-            <p>No registrations yet.</p>
-            <span>Submitted applications from this browser will appear here.</span>
+        <section className="admin-stats">
+          {cards.map(([label, value, detail]) => (
+            <div className="admin-stat-card" key={String(label)}>
+              <span>{label}</span><strong>{value}</strong><small>{detail}</small>
+            </div>
+          ))}
+        </section>
+
+        <section className="admin-section">
+          <div className="admin-section-head">
+            <div><h2>Participants</h2><p>All applications submitted through the public registration form.</p></div>
+            <input className="admin-search" placeholder="Search name, email, city, skill..." value={query} onChange={(event) => setQuery(event.target.value)} />
           </div>
-        ) : (
           <div className="admin-table-wrap">
             <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>City</th>
-                  <th>Experience</th>
-                  <th>Track</th>
-                  <th>Team</th>
-                  <th>Skills</th>
-                  <th>Submitted</th>
-                </tr>
-              </thead>
+              <thead><tr><th>#</th><th>Name</th><th>Email</th><th>City</th><th>Experience</th><th>Skills</th><th>Team</th><th>Submitted</th></tr></thead>
               <tbody>
-                {filtered.map((s, index) => (
-                  <tr key={s.email + index}>
-                    <td>{index + 1}</td>
-                    <td>{`${s.firstName} ${s.lastName}`.trim() || '—'}</td>
-                    <td>{s.email || '—'}</td>
-                    <td>{[s.city, s.country].filter(Boolean).join(', ') || '—'}</td>
-                    <td>{s.experience || '—'}</td>
-                    <td>{s.track || '—'}</td>
-                    <td>{s.hasTeam || '—'}</td>
-                    <td>{s.skills?.join(', ') || '—'}</td>
-                    <td>{new Date(s.submittedAt).toLocaleString()}</td>
+                {filtered.map((record, index) => (
+                  <tr key={record.id}>
+                    <td>{index + 1}</td><td>{record.first_name} {record.last_name}</td><td>{record.email}</td>
+                    <td>{record.city}, {record.country}</td><td>{record.experience_level || '—'}</td>
+                    <td>{record.skills.join(', ') || '—'}</td><td>{record.has_team ? 'Yes' : 'Solo'}</td>
+                    <td>{new Date(record.created_at).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {filtered.length === 0 && <p className="admin-note">No applicant matches “{query}”.</p>}
+            {!loading && !filtered.length && <p className="admin-note">No participants found.</p>}
           </div>
-        )}
+        </section>
       </div>
     </div>
   )
+}
+
+function AdminNotice({ title, text }: { title: string; text: string }) {
+  return <div className="admin-login"><div className="admin-login-card"><Brand /><div className="section-label">/ SETUP</div><h1>{title}</h1><p>{text}</p></div></div>
 }

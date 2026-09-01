@@ -403,3 +403,59 @@ ul { margin: 0; padding: 0; list-style: none; }
 .admin-login-card input.error { border-color: #e0533d; }
 .admin-login-card .primary { justify-content: center; margin-top: 8px; }
 .admin-login-card .field-error { color: #ff8f7a; font-size: 12px; }
+.admin-status { display: inline-flex; align-items: center; gap: 8px; color: #3178ca; font: 11px 'DM Mono', monospace; }
+.admin-alert { background: #fff1ee; border-left: 3px solid #e0533d; color: #9d3321; padding: 14px 16px; font-size: 13px; }
+.admin-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 38px 0 54px; }
+.admin-stat-card { min-height: 132px; display: flex; flex-direction: column; padding: 20px; background: #fff; border: 1px solid #d7dee5; border-top: 3px solid #3178ca; }
+.admin-stat-card span { color: #607286; font: 10px 'DM Mono', monospace; letter-spacing: .6px; text-transform: uppercase; }
+.admin-stat-card strong { font: 34px 'DM Mono', monospace; color: #10233b; margin: 17px 0 7px; }
+.admin-stat-card small { color: #8492a1; font-size: 10px; }
+.admin-section { border-top: 1px solid #cbd4dd; padding-top: 32px; }
+.admin-section-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 22px; }
+.admin-section-head h2 { margin: 0; font-size: 27px; letter-spacing: -1px; }
+.admin-section-head p { margin: 7px 0 0; color: #6a798c; font-size: 13px; }
+.admin-table a { color: #464feb; text-decoration: none; }
+.admin-table tr th, .admin-table tr td { border: 1px solid #e6e6e6; }
+.admin-table tr th { background-color: #f5f5f5; }
+.jury-layout, .team-layout { display: grid; grid-template-columns: minmax(320px, .9fr) minmax(0, 1.35fr); gap: 22px; margin: 34px 0 54px; align-items: start; }
+.jury-score-card, .team-project-form, .team-member-card { background: #fff; border: 1px solid #d7dee5; padding: 28px; }
+.jury-score-card h2, .jury-projects h2, .team-member-card h2 { font-size: 24px; letter-spacing: -1px; margin-bottom: 22px; }
+.jury-score-card label, .team-project-form label { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; color: #526579; font: 10px 'DM Mono', monospace; letter-spacing: .5px; text-transform: uppercase; }
+.jury-score-card label strong { color: #3178ca; font-size: 20px; }
+.jury-score-card select, .jury-score-card textarea, .team-project-form input, .team-project-form textarea, .team-member-card input { border: 1px solid #c8d2dc; background: #fbfcfd; border-radius: 4px; padding: 11px 12px; outline: none; color: #10233b; font: 14px 'Syne', sans-serif; text-transform: none; }
+.jury-score-card select:focus, .jury-score-card textarea:focus, .team-project-form input:focus, .team-project-form textarea:focus, .team-member-card input:focus { border-color: #3178ca; }
+.jury-score-card textarea, .team-project-form textarea { min-height: 88px; resize: vertical; }
+.jury-score-card input[type="range"] { accent-color: #3178ca; width: 100%; }
+.jury-projects { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.jury-projects h2 { grid-column: 1 / -1; }
+.jury-project { background: #102a44; border: 1px solid #21445f; color: #fff; padding: 22px; min-height: 190px; }
+.jury-project > span { color: var(--gold); font: 9px 'DM Mono', monospace; letter-spacing: .5px; }
+.jury-project h3 { font-size: 19px; margin: 15px 0 8px; }
+.jury-project p { color: #b7c6d5; font-size: 12px; line-height: 1.5; }
+.jury-project button { color: var(--gold); font: 10px 'DM Mono', monospace; margin-top: 12px; }
+.team-project-form { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.team-project-form label:nth-child(3), .team-project-form label:nth-child(4), .team-project-form label:nth-child(5), .team-project-form label:nth-child(8), .team-project-form .primary { grid-column: 1 / -1; }
+.team-project-form input[type="file"] { padding: 8px; font-size: 12px; }
+.team-member-card { background: #102a44; color: #fff; }
+.team-member-card p { color: #b7c6d5; font-size: 13px; line-height: 1.5; }
+.team-member-card input { width: 100%; margin: 12px 0; }
+.team-member-card .admin-btn { width: 100%; justify-content: center; }
+.team-upload { margin-top: 32px; padding-top: 22px; border-top: 1px solid #21445f; color: var(--gold); }
+.team-upload p { margin-bottom: 0; }
+.team-success { background: #e5f5ed; border-left: 3px solid #48a47c; color: #17623f; padding: 14px 16px; font-size: 13px; }
+
+@media (max-width: 760px) {
+  .admin-nav { height: auto; min-height: 70px; padding: 15px 6vw; flex-wrap: wrap; }
+  .admin-nav .form-count { display: none; }
+  .admin-actions { width: 100%; }
+  .admin-btn { flex: 1; justify-content: center; padding: 10px 8px; font-size: 10px; }
+  .admin-body { padding: 35px 6vw 60px; }
+  .admin-head h1 { font-size: 42px; }
+  .admin-search { min-width: 100%; width: 100%; }
+  .admin-stats { grid-template-columns: 1fr 1fr; }
+  .admin-section-head { align-items: stretch; flex-direction: column; }
+  .jury-layout, .team-layout { grid-template-columns: 1fr; }
+  .jury-projects { grid-template-columns: 1fr; }
+  .team-project-form { grid-template-columns: 1fr; }
+  .team-project-form label, .team-project-form label:nth-child(3), .team-project-form label:nth-child(4), .team-project-form label:nth-child(5), .team-project-form label:nth-child(8), .team-project-form .primary { grid-column: auto; }
+}

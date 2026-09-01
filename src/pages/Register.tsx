@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import { EXPERIENCE_LEVELS, SKILLS, TRACKS } from '../data'
 import type { RegistrationData } from '../types'
+import { isSupabaseConfigured, submitRegistration } from '../services/registrations'
 
 const STEP_LABELS = ['Participant', 'Background', 'Skills', 'Venture', 'Review']
 const STORAGE_KEY = 'hacktank-registration'
@@ -29,9 +30,10 @@ function loadDraft(): RegistrationData {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function Register() {
-  const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [data, setData] = useState<RegistrationData>(loadDraft)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -77,27 +79,34 @@ export function Register() {
     return Object.keys(next).length === 0
   }
 
-  const goNext = () => {
+  const goNext = async () => {
     if (!validateStep()) return
     if (step < 5) {
       setStep(step + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } else {
-      handleSubmit()
+      await handleSubmit()
     }
   }
 
-  const handleSubmit = () => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY + '-list') || '[]')
-      saved.push({ ...data, submittedAt: new Date().toISOString() })
-      localStorage.setItem(STORAGE_KEY + '-list', JSON.stringify(saved))
-      localStorage.removeItem(STORAGE_KEY + '-draft')
-    } catch {
-      // storage may be unavailable; still show success
+  const handleSubmit = async () => {
+    if (!isSupabaseConfigured) {
+      setSubmitError('Registration is not configured yet. Please contact the organizers.')
+      return
     }
-    setSubmitted(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setIsSubmitting(true)
+    setSubmitError('')
+    try {
+      await submitRegistration(data)
+      localStorage.removeItem(STORAGE_KEY + '-draft')
+      setSubmitted(true)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to submit your application. Please try again.'
+      setSubmitError(message.includes('duplicate') ? 'This email is already registered.' : message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (submitted) {
@@ -250,8 +259,11 @@ export function Register() {
 
           <div className="form-actions">
             {step > 1 && <button type="button" className="back-button" onClick={() => setStep(step - 1)}>← Back</button>}
-            <button className="primary" type="submit">{step === 5 ? 'Submit application' : 'Continue'} <span>↗</span></button>
+            <button className="primary" type="submit" disabled={isSubmitting}>
+              {step === 5 ? (isSubmitting ? 'Submitting...' : 'Submit application') : 'Continue'} <span>↗</span>
+            </button>
           </div>
+          {submitError && <p className="form-submit-error" role="alert">{submitError}</p>}
         </form>
       </div>
     </div>

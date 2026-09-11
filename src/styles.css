@@ -64,6 +64,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .hero h1 em, h1 em, h2 span, h2 em { font-style: normal; color: var(--gold); }
 .hero-text { color: #b9c4d2; font-size: 16px; line-height: 1.6; max-width: 410px; margin-bottom: 34px; }
 .hero-actions { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
+.hero-actions .primary, .hero-actions .primary span { color: #fff; }
 .text-link { font: 11px 'DM Mono', monospace; color: #bac4d1; }
 .text-link span { color: var(--gold); font-size: 18px; margin-left: 9px; }
 .text-link.dark { color: #3178ca; display: inline-block; margin-top: 22px; }
@@ -160,7 +161,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .ghost-button { display: inline-flex; align-items: center; border: 1px solid #345677; color: #cdd9e5; padding: 14px 20px; font: 11px 'DM Mono', monospace; }
 .ghost-button span { color: var(--gold); margin-left: 16px; font-size: 15px; }
 .ghost-button:hover { border-color: var(--gold); color: #fff; }
-.ghost-button.dark { border-color: #b3c0cd; color: #23384c; }
+.ghost-button.dark { border-color: #b3c0cd; color: #fff; }
 .ghost-button.dark:hover { border-color: #3178ca; }
 
 /* PRIZES */
@@ -268,7 +269,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 .contact-card h3 { font-size: 24px; margin-bottom: 26px; }
 .contact-card a, .contact-card span { display: flex; align-items: center; gap: 12px; color: #c2d0de; font-size: 14px; margin-bottom: 18px; }
 .contact-card a:hover { color: var(--gold); }
-.contact-card .primary { margin-top: 16px; }
+.contact-card .primary { margin-top: 16px; color: #fff; }
+.contact-card .primary:hover { color: #fff; }
+.contact-card .primary span { color: #fff; }
 
 /* REGISTRATION */
 .register-page { min-height: 100vh; background: #edf0f3; color: #0a1725; }

@@ -102,7 +102,7 @@ export const TRACKS: Track[] = [
 
 export const SHARKS: Shark[] = [
   {
-    name: "Amira Ben Salah",
+    name: "Amira",
     role: "Managing Partner",
     company: "Delta Ventures",
     expertise: "Seed & Series A",
@@ -111,7 +111,7 @@ export const SHARKS: Shark[] = [
     linkedin: "#",
   },
   {
-    name: "Youssef Karray",
+    name: "Youssef",
     role: "Founder & CEO",
     company: "Nexa Labs",
     expertise: "AI & SaaS",
@@ -120,7 +120,7 @@ export const SHARKS: Shark[] = [
     linkedin: "#",
   },
   {
-    name: "Sonia Khelifi",
+    name: "Sonia",
     role: "Angel Investor",
     company: "MedTech Angels",
     expertise: "HealthTech",
@@ -129,7 +129,7 @@ export const SHARKS: Shark[] = [
     linkedin: "#",
   },
   {
-    name: "Karim Trabelsi",
+    name: "Karim",
     role: "Partner",
     company: "Sahel Capital",
     expertise: "Fintech",
@@ -138,7 +138,7 @@ export const SHARKS: Shark[] = [
     linkedin: "#",
   },
   {
-    name: "Leila Mansour",
+    name: "Leila",
     role: "Head of Product",
     company: "Orbit",
     expertise: "Product & Growth",
@@ -147,7 +147,7 @@ export const SHARKS: Shark[] = [
     linkedin: "#",
   },
   {
-    name: "Hedi Gharbi",
+    name: "Hedi",
     role: "Serial Entrepreneur",
     company: "3x Exits",
     expertise: "Go-to-market",

@@ -44,7 +44,11 @@ ul { margin: 0; padding: 0; list-style: none; }
 .nav-actions { display: flex; align-items: center; gap: 14px; }
 .nav-cta, .primary { background: var(--gold); color: #07111e; padding: 14px 19px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; }
 .nav-cta span, .primary span { margin-left: 18px; font-size: 15px; }
-.primary:hover, .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(244,180,0,.28); transition: .25s; }
+.primary:hover, .nav-cta:hover { transform: translaProject "hacktank" is paused
+All data, including backups and storage objects, remains safe.
+You can resume this project from the dashboard until 15 Oct 2027.
+After that, this project will not be resumable, but data will still be available for download.
+To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12px 26px rgba(244,180,0,.28); transition: .25s; }
 .nav-toggle { display: none; color: #fff; }
 .mobile-only { display: none; }
 

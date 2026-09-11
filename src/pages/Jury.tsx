@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Award, LogOut, Save } from 'lucide-react'
 import { Brand } from '../components/Brand'
-import { getJuryDashboard, saveScore, signIn, signOut, type Criterion, type Project, type Ranking } from '../services/dashboards'
+import { getJuryDashboard, getSignedInRole, saveScore, signIn, signOut, type Criterion, type Project, type Ranking } from '../services/dashboards'
 import { isSupabaseConfigured, supabase } from '../services/supabase'
 
 export function Jury() {
+  const navigate = useNavigate()
   const [authenticated, setAuthenticated] = useState(false)
+  const [accessChecked, setAccessChecked] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -37,7 +40,27 @@ export function Jury() {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => setAuthenticated(Boolean(session)))
     return () => listener.subscription.unsubscribe()
   }, [])
-  useEffect(() => { if (authenticated) void load() }, [authenticated])
+  useEffect(() => {
+    if (!authenticated) {
+      setAccessChecked(false)
+      return
+    }
+
+    void (async () => {
+      try {
+        const role = await getSignedInRole()
+        if (role !== 'jury') {
+          navigate(role === 'admin' ? '/admin' : role === 'participant' ? '/team' : '/', { replace: true })
+          return
+        }
+        setAccessChecked(true)
+        await load()
+      } catch (reason) {
+        setError(reason instanceof Error ? reason.message : 'Unable to verify jury access.')
+        setAccessChecked(true)
+      }
+    })()
+  }, [authenticated, navigate])
 
   const login = async (event: React.FormEvent) => {
     event.preventDefault(); setLoading(true); setError('')
@@ -52,6 +75,7 @@ export function Jury() {
 
   if (!isSupabaseConfigured) return <AccessNotice title="Supabase setup required" text="Configure Supabase before opening the jury dashboard." />
   if (!authenticated) return <Login title="Jury login." email={email} password={password} error={error} loading={loading} setEmail={setEmail} setPassword={setPassword} login={login} />
+  if (!accessChecked) return <AccessNotice title="Checking access..." text="Verifying your account role." />
 
   return <div className="admin-page">
     <header className="admin-nav"><Brand /><span className="form-count">JURY / SCORING ROOM</span><button className="admin-btn" onClick={() => void signOut()}><LogOut size={15} /> Logout</button></header>

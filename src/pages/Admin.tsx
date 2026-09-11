@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Download, LogOut, RefreshCw, Users } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import { getCurrentUserRole, getDashboardStats, getParticipants, isSupabaseConfigured, type DashboardStats, type ParticipantRecord } from '../services/registrations'
@@ -13,6 +14,7 @@ function toCsvCell(value: unknown): string {
 }
 
 export function Admin() {
+  const navigate = useNavigate()
   const [authenticated, setAuthenticated] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,7 +30,10 @@ export function Admin() {
     setDataError('')
     try {
       const role = await getCurrentUserRole()
-      if (role !== 'admin') throw new Error('This account is not an organizer account. Ask an admin to assign it the admin role in Supabase.')
+      if (role !== 'admin') {
+        navigate(role === 'jury' ? '/jury' : role === 'participant' ? '/team' : '/', { replace: true })
+        return
+      }
       const [nextStats, nextRecords] = await Promise.all([getDashboardStats(), getParticipants()])
       setStats(nextStats)
       setRecords(nextRecords)

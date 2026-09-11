@@ -40,7 +40,7 @@ export function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <span>© 2025 {EVENT.org} — {EVENT.name}</span>
+        <span>© 2026 {EVENT.org} — {EVENT.name}</span>
         <span>Made for the bold.</span>
       </div>
     </footer>

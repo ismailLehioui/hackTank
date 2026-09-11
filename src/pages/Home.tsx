@@ -18,7 +18,7 @@ export function Home() {
         <div className="orb orb-one" />
         <div className="orb orb-two" />
         <div className="hero-copy">
-          <p className="eyebrow"><i /> {EVENT.org.toUpperCase()} PRESENTS <span>—</span> 2025</p>
+          <p className="eyebrow"><i /> {EVENT.org.toUpperCase()} PRESENTS <span>—</span> 2026</p>
           <h1>Enter<br /><em>the Tank.</em></h1>
           <p className="hero-text">A 48-hour build sprint where bold teams turn raw ideas into ventures — then pitch them live to a panel of sharks.</p>
           <div className="hero-actions">

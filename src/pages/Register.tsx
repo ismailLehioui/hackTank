@@ -131,7 +131,7 @@ export function Register() {
     <div className="register-page">
       <header className="register-nav">
         <Brand />
-        <span className="form-count">APPLICATION / 2025</span>
+        <span className="form-count">APPLICATION / 2026</span>
         <Link className="close-button" to="/" aria-label="Close">×</Link>
       </header>
 

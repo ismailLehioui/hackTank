@@ -60,8 +60,8 @@ Open the URL displayed by Vite, normally `http://localhost:5173/`.
 
 Run these SQL files in this order from **Supabase > SQL Editor**:
 
-1. [supabase/migrations/20260901_initial_schema.sql](supabase/migrations/20260901_initial_schema.sql)
-2. [supabase/migrations/20260901_dashboards_and_storage.sql](supabase/migrations/20260901_dashboards_and_storage.sql)
+1. [supabase/migrations/20250901_initial_schema.sql](supabase/migrations/20260901_initial_schema.sql)
+2. [supabase/migrations/20250901_dashboards_and_storage.sql](supabase/migrations/20250901_dashboards_and_storage.sql)
 
 They create the database, RLS policies, registration RPC, automatic ranking function and private `pitch-decks` storage bucket.
 

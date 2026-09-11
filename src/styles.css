@@ -5,7 +5,7 @@
   color: #f4f6f8;
   background: #08111d;
   --blue: #4b8dff;
-  --gold: #f4b400;
+  --gold: #7FFF00;
   --navy: #0c2340;
   --muted: #91a0b4;
   --line: #263445;
@@ -219,12 +219,12 @@ ul { margin: 0; padding: 0; list-style: none; }
 .faq-row:last-child { border-bottom: 1px solid #b9c2cb; }
 
 /* CTA BAND */
-.cta-band { background: var(--gold); color: #08111d; padding: 110px 11vw; text-align: center; }
+.cta-band { background: var(--blue); color: #08111d; padding: 110px 11vw; text-align: center; }
 .cta-band .section-label { color: #40516a; }
 .cta-band h2 { margin: 20px 0 34px; }
 .cta-band h2 span { color: #fff; }
 .cta-band .primary { background: #08111d; color: #fff; }
-.cta-band .primary span { color: var(--gold); }
+.cta-band .primary span { color: var(--blue); }
 
 /* FOOTER */
 .footer { background: #071019; padding: 70px 11vw 40px; }

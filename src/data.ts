@@ -13,9 +13,8 @@ export const EVENT = {
   org: "JCI Sousse",
   tagline: "Where builders pitch the sharks.",
   location: "Sousse, Tunisia",
-  dates: "June 14 — 16, 2026",
-  // Countdown target — kept in the future relative to the event build.
-  startsAt: new Date("2026-06-14T09:00:00").toISOString(),
+  dates: "October 3 — 4, 2026",
+  startsAt: new Date("2026-10-03T09:00:00").toISOString(),
 };
 
 export const NAV_LINKS = [

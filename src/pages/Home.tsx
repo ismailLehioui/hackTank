@@ -19,7 +19,7 @@ export function Home() {
         <div className="orb orb-two" />
         <div className="hero-copy">
           <p className="eyebrow"><i /> {EVENT.org.toUpperCase()} PRESENTS <span>—</span> 2026</p>
-          <h1>Enter<br /><em>the Tank.</em></h1>
+          <div className="hero-heading-space" aria-hidden="true" />
           <p className="hero-text">A 48-hour build sprint where bold teams turn raw ideas into ventures — then pitch them live to a panel of sharks.</p>
           <div className="hero-actions">
             <Link className="primary" to="/register">Enter the Tank <span>↗</span></Link>
@@ -34,11 +34,6 @@ export function Home() {
           </div>
         </div>
         <div className="scroll-cue">SCROLL TO EXPLORE <span>↓</span></div>
-      </section>
-
-      {/* TICKER */}
-      <section className="ticker">
-        <div>BUILD <span>✦</span> PITCH <span>✦</span> WIN THE DEAL <span>✦</span> BUILD <span>✦</span> PITCH <span>✦</span> WIN THE DEAL <span>✦</span></div>
       </section>
 
       {/* CONCEPT */}

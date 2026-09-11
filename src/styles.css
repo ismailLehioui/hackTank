@@ -49,13 +49,14 @@ ul { margin: 0; padding: 0; list-style: none; }
 .mobile-only { display: none; }
 
 /* HERO */
-.hero { min-height: 760px; height: 100vh; max-height: 940px; position: relative; overflow: hidden; background: radial-gradient(circle at 66% 43%, #16385d 0, #0d223a 20%, #08111d 54%); padding: 190px 11vw 80px; }
+.hero { min-height: 760px; height: 100vh; max-height: 940px; position: relative; overflow: hidden; background-image: linear-gradient(90deg, rgba(2, 13, 34, .86) 0%, rgba(2, 13, 34, .58) 46%, rgba(2, 13, 34, .16) 100%), url('./bg.PNG'); background-size: cover; background-position: center; background-repeat: no-repeat; padding: 190px 11vw 80px; }
 .grid-lines { position: absolute; inset: 0; opacity: .2; background-image: linear-gradient(rgba(160,190,225,.16) 1px, transparent 1px), linear-gradient(90deg, rgba(160,190,225,.16) 1px, transparent 1px); background-size: 80px 80px; mask-image: linear-gradient(90deg, #000, transparent 78%); }
 .orb { position: absolute; border-radius: 50%; opacity: .7; animation: float 9s ease-in-out infinite; }
 .orb-one { width: 460px; height: 460px; right: 10%; top: 24%; border: 1px solid #4777a8; box-shadow: 0 0 100px #164c79, inset 0 0 80px #102e4c; background: radial-gradient(circle at 35% 30%, rgba(100,184,255,.2), transparent 55%); }
 .orb-two { width: 15px; height: 15px; background: var(--gold); right: 26%; top: 24%; box-shadow: 0 0 25px var(--gold); animation: float 6s ease-in-out infinite; }
 @keyframes float { 50% { transform: translateY(-22px); } }
 .hero-copy { position: relative; z-index: 1; max-width: 640px; }
+.hero-heading-space { height: clamp(178px, 17vw, 245px); }
 .eyebrow, .section-label, .form-kicker { font: 11px 'DM Mono', monospace; letter-spacing: 1.5px; color: var(--blue); }
 .eyebrow i { display: inline-block; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; margin-right: 11px; }
 .eyebrow span { color: #6d7888; margin: 0 10px; }
@@ -340,6 +341,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 @media (max-width: 760px) {
   .hero { min-height: 700px; padding: 140px 8vw 70px; }
   .hero h1 { font-size: 62px; letter-spacing: -3px; }
+  .hero-heading-space { height: 178px; }
   .hero-note { display: none; }
   .orb-one { width: 320px; height: 320px; right: -70px; top: 40%; }
   .section { padding: 80px 8vw; }

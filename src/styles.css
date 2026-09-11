@@ -423,6 +423,22 @@ To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12p
 .admin-section-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 22px; }
 .admin-section-head h2 { margin: 0; font-size: 27px; letter-spacing: -1px; }
 .admin-section-head p { margin: 7px 0 0; color: #6a798c; font-size: 13px; }
+.admin-inline-form { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 22px; }
+.admin-inline-form input { min-width: 170px; flex: 1; border: 1px solid #b6c1cc; padding: 11px 13px; border-radius: 7px; outline: none; font-family: 'Syne', sans-serif; }
+.admin-inline-form input:focus { border-color: #3178ca; }
+.admin-project-input { flex: 1 1 100%; min-height: 70px; border: 1px solid #b6c1cc; padding: 11px 13px; border-radius: 7px; resize: vertical; outline: none; font: 13px 'Syne', sans-serif; }
+.admin-project-input:focus { border-color: #3178ca; }
+.admin-row-actions { display: flex; gap: 7px; white-space: nowrap; }
+.admin-icon-btn { width: 32px; height: 32px; display: inline-grid; place-items: center; border: 1px solid #c2ccd6; border-radius: 6px; color: #33475c; }
+.admin-icon-btn:hover { border-color: #3178ca; color: #3178ca; }
+.admin-icon-btn.danger:hover { border-color: #e0533d; color: #d84a32; }
+.admin-member-list { display: grid; gap: 6px; min-width: 190px; }
+.admin-member-list span { display: grid; gap: 2px; }
+.admin-member-list small, .admin-cell-subtitle { display: block; color: #8492a1; font-size: 11px; margin-top: 4px; }
+.admin-member-add { display: flex; gap: 6px; align-items: center; margin-top: 12px; }
+.admin-member-add select { max-width: 150px; border: 1px solid #c2ccd6; padding: 6px; border-radius: 5px; font-size: 11px; }
+.admin-text-btn { color: #3178ca; font: 10px 'DM Mono', monospace; text-align: left; }
+.admin-text-btn:hover { color: #10233b; text-decoration: underline; }
 .admin-table a { color: #464feb; text-decoration: none; }
 .admin-table tr th, .admin-table tr td { border: 1px solid #e6e6e6; }
 .admin-table tr th { background-color: #f5f5f5; }
@@ -463,6 +479,8 @@ To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12p
   .admin-search { min-width: 100%; width: 100%; }
   .admin-stats { grid-template-columns: 1fr 1fr; }
   .admin-section-head { align-items: stretch; flex-direction: column; }
+  .admin-inline-form { flex-direction: column; }
+  .admin-inline-form input, .admin-inline-form button { width: 100%; }
   .jury-layout, .team-layout { grid-template-columns: 1fr; }
   .jury-projects { grid-template-columns: 1fr; }
   .team-project-form { grid-template-columns: 1fr; }

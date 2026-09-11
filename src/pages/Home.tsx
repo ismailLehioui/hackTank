@@ -1,14 +1,29 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Reveal } from '../components/Reveal'
 import { SectionHeader } from '../components/SectionHeader'
 import { TrackCard } from '../components/TrackCard'
 import { SharkCard } from '../components/SharkCard'
 import { CountdownClock } from '../components/CountdownClock'
 import { EVENT, FAQS, HOW_IT_WORKS, IDEAS, PRIZES, SHARKS, STATS, TIMELINE, TRACKS } from '../data'
+import { getPublicSharks } from '../services/registrations'
+import type { Shark } from '../types'
 
 export function Home() {
   const [activeFaq, setActiveFaq] = useState(0)
+  const [sharks, setSharks] = useState<Shark[]>(SHARKS)
+
+  useEffect(() => {
+    let active = true
+    void getPublicSharks()
+      .then((members) => {
+        if (active && members.length) setSharks(members)
+      })
+      .catch(() => {
+        // Keep the local panel visible if Supabase is unavailable.
+      })
+    return () => { active = false }
+  }, [])
 
   return (
     <>
@@ -97,7 +112,7 @@ export function Home() {
       <section className="sharks section" id="sharks">
         <SectionHeader label="/ 03 — THE PANEL" title="Meet" accent="the Sharks." text="The investors and mentors who will challenge, question and back your venture." dark />
         <div className="shark-grid">
-          {SHARKS.slice(0, 3).map((shark) => (
+          {sharks.slice(0, 3).map((shark) => (
             <Reveal key={shark.name}><SharkCard shark={shark} /></Reveal>
           ))}
         </div>

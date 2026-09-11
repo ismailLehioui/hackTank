@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Download, LogOut, RefreshCw, Users } from 'lucide-react'
+import { Download, LogOut, Pencil, Plus, RefreshCw, Save, Trash2, Users, X } from 'lucide-react'
 import { Brand } from '../components/Brand'
-import { getCurrentUserRole, getDashboardStats, getParticipants, isSupabaseConfigured, type DashboardStats, type ParticipantRecord } from '../services/registrations'
+import { addParticipantToTeam, createJuryMember, deleteJuryMember, deleteTeam, getCurrentUserRole, getDashboardStats, getJuryMembers, getParticipants, getTeams, isSupabaseConfigured, setTeamLeader, updateJuryMember, updateProject, updateTeam, type DashboardStats, type JuryMemberRecord, type ParticipantRecord, type TeamRecord } from '../services/registrations'
 import { supabase } from '../services/supabase'
 
 const EMPTY_STATS: DashboardStats = { participants: 0, teams: 0, projects: 0, mentors: 0, jury: 0, sponsors: 0 }
@@ -24,6 +24,16 @@ export function Admin() {
   const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS)
   const [query, setQuery] = useState('')
   const [dataError, setDataError] = useState('')
+  const [juryMembers, setJuryMembers] = useState<JuryMemberRecord[]>([])
+  const [teams, setTeams] = useState<TeamRecord[]>([])
+  const [juryQuery, setJuryQuery] = useState('')
+  const [teamQuery, setTeamQuery] = useState('')
+  const [juryDraft, setJuryDraft] = useState({ full_name: '', company: '', position: '' })
+  const [editingJuryId, setEditingJuryId] = useState<string | null>(null)
+  const [teamDraft, setTeamDraft] = useState({ team_name: '', slogan: '' })
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null)
+  const [teamProjectDraft, setTeamProjectDraft] = useState({ project_name: '', category: '', description: '', problem_statement: '', solution: '' })
+  const [teamMemberDrafts, setTeamMemberDrafts] = useState<Record<string, string>>({})
 
   const loadDashboard = async () => {
     setLoading(true)
@@ -34,9 +44,13 @@ export function Admin() {
         navigate(role === 'jury' ? '/jury' : role === 'participant' ? '/team' : '/', { replace: true })
         return
       }
-      const [nextStats, nextRecords] = await Promise.all([getDashboardStats(), getParticipants()])
+      const [nextStats, nextRecords, nextJuryMembers, nextTeams] = await Promise.all([
+        getDashboardStats(), getParticipants(), getJuryMembers(), getTeams(),
+      ])
       setStats(nextStats)
       setRecords(nextRecords)
+      setJuryMembers(nextJuryMembers)
+      setTeams(nextTeams)
     } catch (error) {
       setDataError(error instanceof Error ? error.message : 'Unable to load dashboard data.')
     } finally {
@@ -80,7 +94,118 @@ export function Admin() {
     await supabase?.auth.signOut()
     setRecords([])
     setStats(EMPTY_STATS)
+    setJuryMembers([])
+    setTeams([])
   }
+
+  const saveJury = async (event: FormEvent) => {
+    event.preventDefault()
+    setLoading(true)
+    setDataError('')
+    try {
+      const values = { full_name: juryDraft.full_name.trim(), company: juryDraft.company.trim(), position: juryDraft.position.trim() }
+      if (!values.full_name) throw new Error('Jury name is required.')
+      const saved = editingJuryId ? await updateJuryMember(editingJuryId, values) : await createJuryMember(values)
+      setJuryMembers((current) => editingJuryId ? current.map((member) => member.id === editingJuryId ? saved : member) : [...current, saved].sort((a, b) => a.full_name.localeCompare(b.full_name)))
+      setJuryDraft({ full_name: '', company: '', position: '' })
+      setEditingJuryId(null)
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to save jury member.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const removeJury = async (member: JuryMemberRecord) => {
+    if (!window.confirm(`Delete jury member ${member.full_name}? Existing scores will also be deleted.`)) return
+    setLoading(true)
+    try {
+      await deleteJuryMember(member.id)
+      setJuryMembers((current) => current.filter((item) => item.id !== member.id))
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to delete jury member.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const saveTeam = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!editingTeamId) return
+    setLoading(true)
+    try {
+      const saved = await updateTeam(editingTeamId, { team_name: teamDraft.team_name.trim(), slogan: teamDraft.slogan.trim() })
+      setTeams((current) => current.map((team) => team.id === editingTeamId ? { ...team, ...saved } : team))
+      setEditingTeamId(null)
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to save team.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const removeTeam = async (team: TeamRecord) => {
+    if (!window.confirm(`Delete team ${team.team_name}? Its project will be kept without a team.`)) return
+    setLoading(true)
+    try {
+      await deleteTeam(team.id)
+      setTeams((current) => current.filter((item) => item.id !== team.id))
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to delete team.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const addMemberToTeam = async (team: TeamRecord) => {
+    const participantId = teamMemberDrafts[team.id]
+    if (!participantId) return
+    setLoading(true)
+    try {
+      await addParticipantToTeam(team.id, participantId)
+      setTeamMemberDrafts((current) => ({ ...current, [team.id]: '' }))
+      await loadDashboard()
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to add participant to team.')
+      setLoading(false)
+    }
+  }
+
+  const changeLeader = async (team: TeamRecord, participantId: string) => {
+    setLoading(true)
+    try {
+      await setTeamLeader(team.id, participantId)
+      await loadDashboard()
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to change team leader.')
+      setLoading(false)
+    }
+  }
+
+  const saveProject = async (team: TeamRecord) => {
+    if (!team.project) return
+    setLoading(true)
+    try {
+      const saved = await updateProject(team.project.id, teamProjectDraft)
+      setTeams((current) => current.map((item) => item.id === team.id ? { ...item, project: saved } : item))
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to save project.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredJury = useMemo(() => {
+    const normalized = juryQuery.trim().toLowerCase()
+    if (!normalized) return juryMembers
+    return juryMembers.filter((member) => [member.full_name, member.company, member.position].join(' ').toLowerCase().includes(normalized))
+  }, [juryMembers, juryQuery])
+
+  const filteredTeams = useMemo(() => {
+    const normalized = teamQuery.trim().toLowerCase()
+    if (!normalized) return teams
+    return teams.filter((team) => [team.team_name, team.slogan, team.project?.project_name, ...team.members.flatMap((member) => [member.name, member.email])].join(' ').toLowerCase().includes(normalized))
+  }, [teams, teamQuery])
 
   const exportCsv = () => {
     const columns = [
@@ -158,6 +283,66 @@ export function Admin() {
               <span>{label}</span><strong>{value}</strong><small>{detail}</small>
             </div>
           ))}
+        </section>
+
+        <section className="admin-section">
+          <div className="admin-section-head">
+            <div><h2>Jury management</h2><p>Create, edit or remove jury profiles. Account passwords remain managed by Supabase Auth.</p></div>
+            <input className="admin-search" placeholder="Search jury..." value={juryQuery} onChange={(event) => setJuryQuery(event.target.value)} />
+          </div>
+          <form className="admin-inline-form" onSubmit={saveJury}>
+            <input placeholder="Full name" value={juryDraft.full_name} onChange={(event) => setJuryDraft({ ...juryDraft, full_name: event.target.value })} required />
+            <input placeholder="Company" value={juryDraft.company} onChange={(event) => setJuryDraft({ ...juryDraft, company: event.target.value })} />
+            <input placeholder="Position" value={juryDraft.position} onChange={(event) => setJuryDraft({ ...juryDraft, position: event.target.value })} />
+            <button className="admin-btn primary-btn" type="submit" disabled={loading}>{editingJuryId ? <Save size={15} /> : <Plus size={15} />}{editingJuryId ? 'Save' : 'Add jury'}</button>
+            {editingJuryId && <button className="admin-btn" type="button" onClick={() => { setEditingJuryId(null); setJuryDraft({ full_name: '', company: '', position: '' }) }}><X size={15} /> Cancel</button>}
+          </form>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead><tr><th>Name</th><th>Company</th><th>Position</th><th>Account</th><th>Actions</th></tr></thead>
+              <tbody>{filteredJury.map((member) => (
+                <tr key={member.id}>
+                  <td>{member.full_name}</td><td>{member.company || '—'}</td><td>{member.position || '—'}</td><td>{member.user_id ? 'Linked' : 'No account'}</td>
+                  <td className="admin-row-actions"><button className="admin-icon-btn" title="Edit jury" onClick={() => { setEditingJuryId(member.id); setJuryDraft({ full_name: member.full_name, company: member.company || '', position: member.position || '' }) }}><Pencil size={15} /></button><button className="admin-icon-btn danger" title="Delete jury" onClick={() => void removeJury(member)}><Trash2 size={15} /></button></td>
+                </tr>
+              ))}</tbody>
+            </table>
+            {!filteredJury.length && <p className="admin-note">No jury members found.</p>}
+          </div>
+        </section>
+
+        <section className="admin-section">
+          <div className="admin-section-head">
+            <div><h2>Teams</h2><p>Review members and projects, update team details, or remove a team.</p></div>
+            <input className="admin-search" placeholder="Search team, member or project..." value={teamQuery} onChange={(event) => setTeamQuery(event.target.value)} />
+          </div>
+          {editingTeamId && <form className="admin-inline-form" onSubmit={saveTeam}>
+            <input placeholder="Team name" value={teamDraft.team_name} onChange={(event) => setTeamDraft({ ...teamDraft, team_name: event.target.value })} required />
+            <input placeholder="Slogan" value={teamDraft.slogan} onChange={(event) => setTeamDraft({ ...teamDraft, slogan: event.target.value })} />
+            <button className="admin-btn primary-btn" type="submit" disabled={loading}><Save size={15} /> Save team</button>
+            <input placeholder="Project name" value={teamProjectDraft.project_name} onChange={(event) => setTeamProjectDraft({ ...teamProjectDraft, project_name: event.target.value })} />
+            <input placeholder="Project category" value={teamProjectDraft.category} onChange={(event) => setTeamProjectDraft({ ...teamProjectDraft, category: event.target.value })} />
+            <textarea className="admin-project-input" placeholder="Project description" value={teamProjectDraft.description} onChange={(event) => setTeamProjectDraft({ ...teamProjectDraft, description: event.target.value })} />
+            <textarea className="admin-project-input" placeholder="Problem statement" value={teamProjectDraft.problem_statement} onChange={(event) => setTeamProjectDraft({ ...teamProjectDraft, problem_statement: event.target.value })} />
+            <textarea className="admin-project-input" placeholder="Solution" value={teamProjectDraft.solution} onChange={(event) => setTeamProjectDraft({ ...teamProjectDraft, solution: event.target.value })} />
+            <button className="admin-btn primary-btn" type="button" disabled={loading} onClick={() => { const team = teams.find((item) => item.id === editingTeamId); if (team) void saveProject(team) }}><Save size={15} /> Save project</button>
+            <button className="admin-btn" type="button" onClick={() => setEditingTeamId(null)}><X size={15} /> Cancel</button>
+          </form>}
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead><tr><th>Team</th><th>Members</th><th>Project</th><th>Created</th><th>Actions</th></tr></thead>
+              <tbody>{filteredTeams.map((team) => (
+                <tr key={team.id}>
+                  <td><strong>{team.team_name}</strong>{team.slogan && <small className="admin-cell-subtitle">{team.slogan}</small>}</td>
+                  <td><div className="admin-member-list">{team.members.length ? team.members.map((member) => <span key={member.participant_id}>{member.name}{member.is_leader ? ' (leader)' : ''}<small>{member.email}</small>{!member.is_leader && <button className="admin-text-btn" onClick={() => void changeLeader(team, member.participant_id)}>Make leader</button>}</span>) : 'No members'}</div><div className="admin-member-add"><select value={teamMemberDrafts[team.id] || ''} onChange={(event) => setTeamMemberDrafts((current) => ({ ...current, [team.id]: event.target.value }))}><option value="">Add participant...</option>{records.filter((record) => !team.members.some((member) => member.participant_id === record.id)).map((record) => <option value={record.id} key={record.id}>{record.first_name} {record.last_name}</option>)}</select><button className="admin-text-btn" onClick={() => void addMemberToTeam(team)}>Add</button></div></td>
+                  <td><strong>{team.project?.project_name || '—'}</strong>{team.project?.category && <small className="admin-cell-subtitle">{team.project.category}</small>}{team.project && <button className="admin-text-btn" onClick={() => { setTeamProjectDraft({ project_name: team.project?.project_name || '', category: team.project?.category || '', description: team.project?.description || '', problem_statement: team.project?.problem_statement || '', solution: team.project?.solution || '' }); setEditingTeamId(team.id) }}>Edit project</button>}</td>
+                  <td>{new Date(team.created_at).toLocaleDateString()}</td>
+                  <td className="admin-row-actions"><button className="admin-icon-btn" title="Edit team" onClick={() => { setEditingTeamId(team.id); setTeamDraft({ team_name: team.team_name, slogan: team.slogan || '' }) }}><Pencil size={15} /></button><button className="admin-icon-btn danger" title="Delete team" onClick={() => void removeTeam(team)}><Trash2 size={15} /></button></td>
+                </tr>
+              ))}</tbody>
+            </table>
+            {!filteredTeams.length && <p className="admin-note">No teams found.</p>}
+          </div>
         </section>
 
         <section className="admin-section">

@@ -1,9 +1,27 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { Reveal } from '../components/Reveal'
 import { SharkCard } from '../components/SharkCard'
 import { SHARKS } from '../data'
+import { getPublicSharks } from '../services/registrations'
+import type { Shark } from '../types'
+
 
 export function Sharks() {
+  const [sharks, setSharks] = useState<Shark[]>(SHARKS)
+
+  useEffect(() => {
+    let active = true
+    void getPublicSharks()
+      .then((members) => {
+        if (active && members.length) setSharks(members)
+      })
+      .catch(() => {
+        // Keep the local panel visible if Supabase is unavailable.
+      })
+    return () => { active = false }
+  }, [])
+
   return (
     <div className="page page-dark">
       <section className="page-hero on-dark">
@@ -13,7 +31,7 @@ export function Sharks() {
       </section>
 
       <section className="section shark-grid full">
-        {SHARKS.map((shark, index) => (
+        {sharks.map((shark, index) => (
           <Reveal key={shark.name} delay={index * 60}><SharkCard shark={shark} /></Reveal>
         ))}
       </section>

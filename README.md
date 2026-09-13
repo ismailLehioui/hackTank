@@ -1,6 +1,6 @@
 # Hack Tank
 
-Hackathon platform inspired by Shark Tank for **JCI Sousse**. Teams build for 48 hours, then pitch their venture to investors and mentors: the Sharks.
+Hackathon platform inspired by Shark Tank for **JCI Sousse**. Teams build for 24 hours, then pitch their venture to investors and mentors: the Sharks.
 
 The application uses React, TypeScript, Vite, React Router and Supabase.
 
@@ -15,17 +15,17 @@ The application uses React, TypeScript, Vite, React Router and Supabase.
 
 ## Pages
 
-| Route | Access | Purpose |
-| --- | --- | --- |
-| `/` | Public | Landing page and event information |
-| `/tracks` | Public | Tracks and prize deals |
-| `/sharks` | Public | Jury and investor panel |
-| `/ideas` | Public | Idea wall with track filtering |
-| `/faq` | Public | FAQ and contact information |
-| `/register` | Public | Participant registration |
-| `/admin` | Admin | Event dashboard and participant export |
-| `/jury` | Jury | Project scoring and ranking |
-| `/team` | Participant | Project, team and pitch-deck management |
+| Route       | Access      | Purpose                                 |
+| ----------- | ----------- | --------------------------------------- |
+| `/`         | Public      | Landing page and event information      |
+| `/tracks`   | Public      | Tracks and prize deals                  |
+| `/sharks`   | Public      | Jury and investor panel                 |
+| `/ideas`    | Public      | Idea wall with track filtering          |
+| `/faq`      | Public      | FAQ and contact information             |
+| `/register` | Public      | Participant registration                |
+| `/admin`    | Admin       | Event dashboard and participant export  |
+| `/jury`     | Jury        | Project scoring and ranking             |
+| `/team`     | Participant | Project, team and pitch-deck management |
 
 ## Local setup
 
@@ -99,13 +99,13 @@ The jury member can then sign in at `/jury`.
 
 ## Scripts
 
-| Script | Description |
-| --- | --- |
-| `npm run dev` | Start the Vite development server |
-| `npm run build` | Type-check and create the production bundle |
-| `npm run preview` | Preview the production bundle |
-| `npm run generate:presentation` | Generate the project scoping deck |
-| `npm run generate:interface-brief` | Generate the interface and content deck |
+| Script                             | Description                                 |
+| ---------------------------------- | ------------------------------------------- |
+| `npm run dev`                      | Start the Vite development server           |
+| `npm run build`                    | Type-check and create the production bundle |
+| `npm run preview`                  | Preview the production bundle               |
+| `npm run generate:presentation`    | Generate the project scoping deck           |
+| `npm run generate:interface-brief` | Generate the interface and content deck     |
 
 ## Architecture
 
@@ -127,7 +127,7 @@ supabase/
 The repository includes SPA routing configuration for Vercel and Netlify:
 
 - [vercel.json](vercel.json) handles Vercel route rewrites.
-- [public/_redirects](public/_redirects) handles Netlify route rewrites.
+- [public/\_redirects](public/_redirects) handles Netlify route rewrites.
 
 Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the hosting provider’s environment-variable settings before deploying. Use `npm run build` as the build command and `dist` as the publish directory.
 

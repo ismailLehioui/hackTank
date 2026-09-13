@@ -4,12 +4,11 @@ import { Reveal } from '../components/Reveal'
 import { SectionHeader } from '../components/SectionHeader'
 import { SharkCard } from '../components/SharkCard'
 import { CountdownClock } from '../components/CountdownClock'
-import { EVENT, FAQS, HOW_IT_WORKS, IDEAS, PRIZES, SHARKS, STATS, TIMELINE } from '../data'
+import { EVENT, HOW_IT_WORKS, IDEAS, SHARKS, STATS } from '../data'
 import { getPublicIdeas, getPublicSharks } from '../services/registrations'
 import type { Shark } from '../types'
 
 export function Home() {
-  const [activeFaq, setActiveFaq] = useState(0)
   const [sharks, setSharks] = useState<Shark[]>(SHARKS)
   const [ideas, setIdeas] = useState(IDEAS)
 
@@ -69,7 +68,7 @@ export function Home() {
           <Reveal><h2>Inspired by<br /><span>Shark Tank.</span></h2></Reveal>
           <Reveal delay={100}>
             <div>
-              <p className="lead">Hack Tank turns the hackathon into a startup arena. Build for 48 hours, then step on stage and pitch your venture to real investors and mentors — the Sharks.</p>
+              <p className="lead">Hack Tank turns the hackathon into a startup arena. Build for 24 hours, then step on stage and pitch your venture to real investors and mentors — the Sharks.</p>
               <p>Powered by {EVENT.org}, it is your shot to defend a bold idea, win the panel over, and walk away with funding, mentorship and momentum.</p>
               <Link className="circle-link" to="/register">Step into the Tank <span>↗</span></Link>
             </div>
@@ -108,59 +107,6 @@ export function Home() {
           <h2>The Tank<br /><span>opens in.</span></h2>
         </div>
         <CountdownClock />
-      </section>
-
-      {/* PRIZES */}
-      <section className="prizes section">
-        <SectionHeader label="/ 04 — THE STAKES" title="Deals worth" accent="pitching for." />
-        <div className="prize-grid">
-          {PRIZES.map((prize) => (
-            <Reveal key={prize.rank} className={`prize ${prize.className}`}>
-              <span>{prize.rank}</span>
-              <strong>{prize.amount} <small>{prize.unit}</small></strong>
-              <p className="prize-tier">{prize.tier}</p>
-              <ul>{prize.perks.map((perk) => <li key={perk}>{perk}</li>)}</ul>
-              <b>{prize.glyph}</b>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* TIMELINE */}
-      <section className="timeline section">
-        <SectionHeader label="/ 05 — THE RUN OF SHOW" title="From spark" accent="to stage." />
-        <div className="timeline-list">
-          {TIMELINE.map((item, index) => (
-            <Reveal key={item.title} delay={index * 50} className={`timeline-item ${index === 0 ? 'current' : ''}`}>
-              <span className="timeline-number">{item.phase}</span>
-              <div>
-                <h3>{item.title}</h3>
-                <p>{item.date} — {item.detail}</p>
-              </div>
-              <span className="timeline-dot" />
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="faq section">
-        <div className="section-label">/ GOOD TO KNOW</div>
-        <div className="faq-layout">
-          <h2>The questions<br /><span>you’re thinking.</span></h2>
-          <div>
-            {FAQS.slice(0, 4).map((faq, index) => (
-              <div className="faq-row" key={faq.question}>
-                <button onClick={() => setActiveFaq(activeFaq === index ? -1 : index)} aria-expanded={activeFaq === index}>
-                  <span>{faq.question}</span>
-                  <b>{activeFaq === index ? '−' : '+'}</b>
-                </button>
-                {activeFaq === index && <p>{faq.answer}</p>}
-              </div>
-            ))}
-            <Link className="text-link dark" to="/faq">All questions <span>↗</span></Link>
-          </div>
-        </div>
       </section>
 
       {/* FINAL CTA */}

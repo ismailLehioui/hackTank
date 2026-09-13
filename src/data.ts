@@ -20,7 +20,7 @@ export const EVENT = {
 export const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/sharks", label: "The Sharks" },
-  { to: "/ideas", label: "Idea Wall" },
+  { to: "/timeline", label: "Timeline" },
   { to: "/faq", label: "FAQ" },
 ];
 
@@ -40,7 +40,7 @@ export const HOW_IT_WORKS = [
   {
     step: "02",
     title: "Build your venture",
-    text: "48 hours to turn a raw idea into a working prototype.",
+    text: "24 hours to turn a raw idea into a working prototype.",
   },
   {
     step: "03",
@@ -173,7 +173,7 @@ export const TIMELINE: TimelineStep[] = [
     phase: "03",
     title: "Build sprint",
     date: "June 14 — 15",
-    detail: "48 hours to build with mentors on standby.",
+    detail: "24 hours to build with mentors on standby.",
   },
   {
     phase: "04",
@@ -274,27 +274,21 @@ export const FAQS: Faq[] = [
   {
     question: "What does “pitch the sharks” actually mean?",
     answer:
-      "After 48 hours of building, each team gets five minutes on stage to pitch their venture to a panel of investors and mentors — our Sharks — followed by a short Q&A. The best pitches leave with real deals.",
+      "After 24 hours of building, each team gets five minutes on stage to pitch their venture to a panel of investors and mentors — our Sharks — followed by a short Q&A. The best pitches leave with real deals.",
   },
   {
     question: "Do I need a team to register?",
-    answer:
-      "No. You can enter the Tank solo and find teammates during the team formation phase, or use the Idea Wall to connect before the event.",
+    answer: "Yes. You need to register with a team before the event.",
   },
   {
     question: "Do I need a finished idea?",
     answer:
-      "Not at all. Bring an idea or find one on the day. What matters is your energy to build and pitch something meaningful.",
+      "You should come with an idea you want to develop. It does not need to be fully finished — what matters is your energy to build and pitch something meaningful.",
   },
   {
     question: "Who can participate?",
     answer:
       "Students, professionals, designers, developers and entrepreneurs are all welcome. Curiosity matters more than your job title.",
-  },
-  {
-    question: "How much does it cost?",
-    answer:
-      "Participation is free. Meals, workspace and mentorship during the event are covered by JCI Sousse and our partners.",
   },
   {
     question: "What should I bring?",

@@ -110,7 +110,6 @@ export function Register() {
           <p>Your application is in, {data.firstName || 'builder'}. We’ll email <b>{data.email}</b> with everything you need to prepare your pitch.</p>
           <div className="success-actions">
             <Link className="primary" to="/">Back to home <span>↗</span></Link>
-            <Link className="ghost-button dark" to="/ideas">Explore the idea wall</Link>
           </div>
         </div>
       </div>

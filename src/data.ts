@@ -19,13 +19,13 @@ export const EVENT = {
 
 export const NAV_LINKS = [
   { to: "/", label: "Home" },
-  { to: "/sharks", label: "The Sharks" },
   { to: "/timeline", label: "Timeline" },
+  { to: "/sharks", label: "The Sharks" },
   { to: "/faq", label: "FAQ" },
 ];
 
 export const STATS: Stat[] = [
-  { value: "48", label: "Hours to build & pitch" },
+  { value: "24", label: "Hours to build & pitch" },
   { value: "01", label: "Pitch stage" },
   { value: "50K", label: "TND in deals" },
   { value: "12", label: "Sharks on the panel" },
@@ -283,7 +283,7 @@ export const FAQS: Faq[] = [
   {
     question: "Do I need a finished idea?",
     answer:
-      "You should come with an idea you want to develop. It does not need to be fully finished — what matters is your energy to build and pitch something meaningful.",
+      "Your team will create and develop an idea together on the day of the Hack Tank, then turn it into something meaningful to build and pitch.",
   },
   {
     question: "Who can participate?",

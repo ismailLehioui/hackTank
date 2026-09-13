@@ -19,7 +19,7 @@ const emptyData: RegistrationData = {
 function loadDraft(): RegistrationData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY + '-draft')
-    if (raw) return { ...emptyData, ...JSON.parse(raw) }
+    if (raw) return { ...emptyData, ...JSON.parse(raw), hasTeam: 'Yes, we’re a team' }
   } catch {
     // ignore corrupted drafts
   }
@@ -58,9 +58,6 @@ export function Register() {
     }
     if (step === 2) {
       if (!data.experience) next.experience = 'Choose your level'
-    }
-    if (step === 3) {
-      if (!data.hasTeam) next.hasTeam = 'Let us know'
     }
     if (step === 4) {
       if (!data.acceptRules) next.acceptRules = 'Please accept to continue'
@@ -185,15 +182,6 @@ export function Register() {
               <h2>Team up for<br /><span>the Tank.</span></h2>
               <div className="input-grid single">
                 <Field label="Team name (optional)"><input value={data.teamName} onChange={(e) => update('teamName', e.target.value)} placeholder="Something people remember" /></Field>
-              </div>
-              <div className="team-toggle">
-                <p className="form-hint">Do you already have a team?</p>
-                {errors.hasTeam && <p className="field-error">{errors.hasTeam}</p>}
-                <div className="pill-choices">
-                  {['Yes, we’re a team', 'No, I’m solo'].map((option) => (
-                    <button type="button" key={option} className={data.hasTeam === option ? 'active' : ''} onClick={() => update('hasTeam', option)}>{option}</button>
-                  ))}
-                </div>
               </div>
             </>
           )}

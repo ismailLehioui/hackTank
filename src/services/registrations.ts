@@ -1,4 +1,4 @@
-import type { RegistrationData, Shark } from "../types";
+import type { Idea, RegistrationData, Shark } from "../types";
 import { isSupabaseConfigured, supabase } from "./supabase";
 
 export type ParticipantRecord = {
@@ -14,7 +14,6 @@ export type ParticipantRecord = {
   company: string | null;
   position: string | null;
   experience_level: string | null;
-  skills: string[];
   has_team: boolean;
   looking_for_teammates: boolean;
   created_at: string;
@@ -46,6 +45,8 @@ export type PublicJuryMember = {
   linkedin_url: string | null;
 };
 
+export type PublicIdea = Idea & { id: string };
+
 export type TeamRecord = {
   id: string;
   team_name: string;
@@ -67,6 +68,13 @@ export type TeamRecord = {
   } | null;
 };
 
+export type AdminProjectRecord = {
+  id: string;
+  team_id: string | null;
+  project_name: string;
+  category: string | null;
+};
+
 export async function submitRegistration(data: RegistrationData) {
   if (!supabase) throw new Error("Supabase is not configured");
 
@@ -82,13 +90,13 @@ export async function submitRegistration(data: RegistrationData) {
     p_company: data.company,
     p_position: data.position,
     p_experience: data.experience,
-    p_skills: data.skills,
+    p_skills: [],
     p_has_team: data.hasTeam === "Yes, we’re a team",
     p_team_name: data.teamName,
-    p_track: data.track,
-    p_idea: data.idea,
-    p_problem: data.problem,
-    p_looking_for_teammates: data.lookingForTeammates,
+    p_track: "",
+    p_idea: "",
+    p_problem: "",
+    p_looking_for_teammates: false,
   });
 
   if (error) throw error;
@@ -182,6 +190,32 @@ export async function getPublicSharks(): Promise<Shark[]> {
       linkedin: member.linkedin_url || "#",
     };
   });
+}
+
+export async function getPublicIdeas(): Promise<PublicIdea[]> {
+  if (!supabase) return [];
+  const [projectsResult, teamsResult] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("id, project_name, category, description, team_id")
+      .order("created_at", { ascending: false }),
+    supabase.from("teams").select("id, team_name"),
+  ]);
+  const error = projectsResult.error || teamsResult.error;
+  if (error) throw error;
+  const teams = new Map(
+    (teamsResult.data ?? []).map((team) => [team.id, team.team_name]),
+  );
+  return (projectsResult.data ?? []).map((project) => ({
+    id: project.id,
+    title: project.project_name,
+    track: project.category || "Open Innovation",
+    author: project.team_id
+      ? teams.get(project.team_id) || "Community venture"
+      : "Solo builder",
+    blurb: project.description || "A new venture taking shape in the Tank.",
+    seeking: project.team_id ? "Feedback" : "Teammates",
+  }));
 }
 
 export async function createJuryMember(
@@ -279,6 +313,41 @@ export async function getTeams(): Promise<TeamRecord[]> {
   })) as TeamRecord[];
 }
 
+export async function getAdminProjects(): Promise<AdminProjectRecord[]> {
+  if (!supabase) throw new Error("Supabase is not configured");
+  const { data, error } = await supabase
+    .from("projects")
+    .select("id, team_id, project_name, category")
+    .order("project_name", { ascending: true });
+  if (error) throw error;
+  return data as AdminProjectRecord[];
+}
+
+export async function associateProjectToTeam(
+  teamId: string,
+  projectId: string,
+  previousProjectId?: string,
+) {
+  if (!supabase) throw new Error("Supabase is not configured");
+  if (previousProjectId && previousProjectId !== projectId) {
+    const { error: clearError } = await supabase
+      .from("projects")
+      .update({ team_id: null })
+      .eq("id", previousProjectId);
+    if (clearError) throw clearError;
+  }
+  const { data, error } = await supabase
+    .from("projects")
+    .update({ team_id: teamId })
+    .eq("id", projectId)
+    .select(
+      "id, team_id, project_name, category, description, problem_statement, solution",
+    )
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function updateTeam(
   id: string,
   values: Pick<TeamRecord, "team_name" | "slogan">,
@@ -353,6 +422,12 @@ export async function updateProject(
     .single();
   if (error) throw error;
   return data;
+}
+
+export async function deleteProject(id: string) {
+  if (!supabase) throw new Error("Supabase is not configured");
+  const { error } = await supabase.from("projects").delete().eq("id", id);
+  if (error) throw error;
 }
 
 export async function getCurrentUserRole() {

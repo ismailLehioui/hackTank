@@ -2,16 +2,16 @@ import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Reveal } from '../components/Reveal'
 import { SectionHeader } from '../components/SectionHeader'
-import { TrackCard } from '../components/TrackCard'
 import { SharkCard } from '../components/SharkCard'
 import { CountdownClock } from '../components/CountdownClock'
-import { EVENT, FAQS, HOW_IT_WORKS, IDEAS, PRIZES, SHARKS, STATS, TIMELINE, TRACKS } from '../data'
-import { getPublicSharks } from '../services/registrations'
+import { EVENT, FAQS, HOW_IT_WORKS, IDEAS, PRIZES, SHARKS, STATS, TIMELINE } from '../data'
+import { getPublicIdeas, getPublicSharks } from '../services/registrations'
 import type { Shark } from '../types'
 
 export function Home() {
   const [activeFaq, setActiveFaq] = useState(0)
   const [sharks, setSharks] = useState<Shark[]>(SHARKS)
+  const [ideas, setIdeas] = useState(IDEAS)
 
   useEffect(() => {
     let active = true
@@ -21,6 +21,18 @@ export function Home() {
       })
       .catch(() => {
         // Keep the local panel visible if Supabase is unavailable.
+      })
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    void getPublicIdeas()
+      .then((nextIdeas) => {
+        if (active && nextIdeas.length) setIdeas(nextIdeas)
+      })
+      .catch(() => {
+        // Keep the local wall visible if Supabase is unavailable.
       })
     return () => { active = false }
   }, [])
@@ -89,16 +101,6 @@ export function Home() {
         </div>
       </section>
 
-      {/* TRACKS */}
-      <section className="tracks section" id="tracks">
-        <SectionHeader label="/ 02 — PICK YOUR ARENA" title="Six tracks." accent="One winning pitch." text="Choose the arena where your venture makes the biggest dent." />
-        <div className="track-grid">
-          {TRACKS.map((track, index) => (
-            <Reveal key={track.id} delay={index * 60}><TrackCard track={track} index={index} /></Reveal>
-          ))}
-        </div>
-      </section>
-
       {/* COUNTDOWN */}
       <section className="countdown section">
         <div>
@@ -150,22 +152,6 @@ export function Home() {
             </Reveal>
           ))}
         </div>
-      </section>
-
-      {/* IDEA WALL */}
-      <section className="ideas section" id="ideas">
-        <SectionHeader label="/ 06 — THE IDEA WALL" title="Ventures already" accent="taking shape." text="Browse ideas from the community and find a crew to build with." />
-        <div className="idea-grid">
-          {IDEAS.slice(0, 3).map((idea) => (
-            <Reveal key={idea.title} className="idea-card">
-              <span className="idea-track">{idea.track}</span>
-              <h3>{idea.title}</h3>
-              <p>{idea.blurb}</p>
-              <div className="idea-foot"><span>{idea.author}</span><b>Seeking: {idea.seeking}</b></div>
-            </Reveal>
-          ))}
-        </div>
-        <div className="section-cta"><Link className="ghost-button dark" to="/ideas">Explore the wall <span>↗</span></Link></div>
       </section>
 
       {/* FAQ */}

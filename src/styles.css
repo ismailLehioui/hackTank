@@ -437,8 +437,12 @@ To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12p
 .admin-member-list small, .admin-cell-subtitle { display: block; color: #8492a1; font-size: 11px; margin-top: 4px; }
 .admin-member-add { display: flex; gap: 6px; align-items: center; margin-top: 12px; }
 .admin-member-add select { max-width: 150px; border: 1px solid #c2ccd6; padding: 6px; border-radius: 5px; font-size: 11px; }
+.admin-project-select { max-width: 170px; border: 1px solid #c2ccd6; padding: 6px; border-radius: 5px; font-size: 11px; }
 .admin-text-btn { color: #3178ca; font: 10px 'DM Mono', monospace; text-align: left; }
 .admin-text-btn:hover { color: #10233b; text-decoration: underline; }
+.admin-project-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.admin-text-btn.danger-text { color: #d84a32; }
+.admin-text-btn.danger-text:hover { color: #9d3321; }
 .admin-table a { color: #464feb; text-decoration: none; }
 .admin-table tr th, .admin-table tr td { border: 1px solid #e6e6e6; }
 .admin-table tr th { background-color: #f5f5f5; }

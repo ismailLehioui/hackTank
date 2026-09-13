@@ -1,13 +1,26 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Reveal } from '../components/Reveal'
-import { IDEAS, TRACKS } from '../data'
+import { IDEAS } from '../data'
+import { getPublicIdeas } from '../services/registrations'
+import type { Idea } from '../types'
 
 export function Ideas() {
-  const [filter, setFilter] = useState('All')
+  const [ideas, setIdeas] = useState<Idea[]>(IDEAS)
 
-  const filters = useMemo(() => ['All', ...TRACKS.map((track) => track.name)], [])
-  const visible = filter === 'All' ? IDEAS : IDEAS.filter((idea) => idea.track === filter)
+  useEffect(() => {
+    let active = true
+    void getPublicIdeas()
+      .then((nextIdeas) => {
+        if (active && nextIdeas.length) setIdeas(nextIdeas)
+      })
+      .catch(() => {
+        // Keep the local wall visible if Supabase is unavailable.
+      })
+    return () => { active = false }
+  }, [])
+
+  const visible = ideas
 
   return (
     <div className="page">
@@ -18,22 +31,9 @@ export function Ideas() {
       </section>
 
       <section className="section">
-        <div className="idea-filters">
-          {filters.map((item) => (
-            <button
-              key={item}
-              className={filter === item ? 'active' : ''}
-              onClick={() => setFilter(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-
         <div className="idea-grid full">
           {visible.map((idea) => (
             <Reveal key={idea.title} className="idea-card">
-              <span className="idea-track">{idea.track}</span>
               <h3>{idea.title}</h3>
               <p>{idea.blurb}</p>
               <div className="idea-foot"><span>{idea.author}</span><b>Seeking: {idea.seeking}</b></div>

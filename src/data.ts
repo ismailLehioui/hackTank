@@ -19,7 +19,6 @@ export const EVENT = {
 
 export const NAV_LINKS = [
   { to: "/", label: "Home" },
-  { to: "/tracks", label: "Tracks & Prizes" },
   { to: "/sharks", label: "The Sharks" },
   { to: "/ideas", label: "Idea Wall" },
   { to: "/faq", label: "FAQ" },
@@ -27,7 +26,7 @@ export const NAV_LINKS = [
 
 export const STATS: Stat[] = [
   { value: "48", label: "Hours to build & pitch" },
-  { value: "06", label: "Pitch tracks" },
+  { value: "01", label: "Pitch stage" },
   { value: "50K", label: "TND in deals" },
   { value: "12", label: "Sharks on the panel" },
 ];
@@ -36,7 +35,7 @@ export const HOW_IT_WORKS = [
   {
     step: "01",
     title: "Enter the Tank",
-    text: "Register solo or with your crew and claim your track.",
+    text: "Register solo or with your crew and bring your boldest idea.",
   },
   {
     step: "02",
@@ -168,7 +167,7 @@ export const TIMELINE: TimelineStep[] = [
     phase: "02",
     title: "Team formation",
     date: "June 11 — 13",
-    detail: "Find teammates and lock in your track.",
+    detail: "Find teammates and shape your venture.",
   },
   {
     phase: "03",
@@ -302,19 +301,6 @@ export const FAQS: Faq[] = [
     answer:
       "Your laptop, charger, an open mind and the ambition to build something worth pitching.",
   },
-];
-
-export const SKILLS = [
-  "Frontend",
-  "Backend",
-  "DevOps",
-  "Mobile",
-  "UI/UX",
-  "Data Science",
-  "AI",
-  "Product Management",
-  "Marketing",
-  "Business",
 ];
 
 export const EXPERIENCE_LEVELS = [

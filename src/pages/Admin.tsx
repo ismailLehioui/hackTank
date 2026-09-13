@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Download, LogOut, Pencil, Plus, RefreshCw, Save, Trash2, Users, X } from 'lucide-react'
 import { Brand } from '../components/Brand'
-import { addParticipantToTeam, createJuryMember, deleteJuryMember, deleteTeam, getCurrentUserRole, getDashboardStats, getJuryMembers, getParticipants, getTeams, isSupabaseConfigured, setTeamLeader, updateJuryMember, updateProject, updateTeam, type DashboardStats, type JuryMemberRecord, type ParticipantRecord, type TeamRecord } from '../services/registrations'
+import { addParticipantToTeam, associateProjectToTeam, createJuryMember, deleteJuryMember, deleteProject, deleteTeam, getAdminProjects, getCurrentUserRole, getDashboardStats, getJuryMembers, getParticipants, getTeams, isSupabaseConfigured, setTeamLeader, updateJuryMember, updateProject, updateTeam, type AdminProjectRecord, type DashboardStats, type JuryMemberRecord, type ParticipantRecord, type TeamRecord } from '../services/registrations'
 import { supabase } from '../services/supabase'
 
 const EMPTY_STATS: DashboardStats = { participants: 0, teams: 0, projects: 0, mentors: 0, jury: 0, sponsors: 0 }
@@ -26,6 +26,7 @@ export function Admin() {
   const [dataError, setDataError] = useState('')
   const [juryMembers, setJuryMembers] = useState<JuryMemberRecord[]>([])
   const [teams, setTeams] = useState<TeamRecord[]>([])
+  const [projects, setProjects] = useState<AdminProjectRecord[]>([])
   const [juryQuery, setJuryQuery] = useState('')
   const [teamQuery, setTeamQuery] = useState('')
   const [juryDraft, setJuryDraft] = useState({ full_name: '', company: '', position: '' })
@@ -44,13 +45,14 @@ export function Admin() {
         navigate(role === 'jury' ? '/jury' : role === 'participant' ? '/team' : '/', { replace: true })
         return
       }
-      const [nextStats, nextRecords, nextJuryMembers, nextTeams] = await Promise.all([
-        getDashboardStats(), getParticipants(), getJuryMembers(), getTeams(),
+      const [nextStats, nextRecords, nextJuryMembers, nextTeams, nextProjects] = await Promise.all([
+        getDashboardStats(), getParticipants(), getJuryMembers(), getTeams(), getAdminProjects(),
       ])
       setStats(nextStats)
       setRecords(nextRecords)
       setJuryMembers(nextJuryMembers)
       setTeams(nextTeams)
+      setProjects(nextProjects)
     } catch (error) {
       setDataError(error instanceof Error ? error.message : 'Unable to load dashboard data.')
     } finally {
@@ -73,7 +75,7 @@ export function Admin() {
     const normalized = query.trim().toLowerCase()
     if (!normalized) return records
     return records.filter((record) =>
-      [record.first_name, record.last_name, record.email, record.city, record.experience_level, ...record.skills]
+      [record.first_name, record.last_name, record.email, record.city, record.experience_level]
         .join(' ')
         .toLowerCase()
         .includes(normalized),
@@ -96,6 +98,7 @@ export function Admin() {
     setStats(EMPTY_STATS)
     setJuryMembers([])
     setTeams([])
+    setProjects([])
   }
 
   const saveJury = async (event: FormEvent) => {
@@ -171,6 +174,22 @@ export function Admin() {
     }
   }
 
+  const associateProject = async (team: TeamRecord) => {
+    const projectId = teamMemberDrafts[`project:${team.id}`]
+    if (!projectId) return
+    setLoading(true)
+    try {
+      const saved = await associateProjectToTeam(team.id, projectId, team.project?.id)
+      setTeams((current) => current.map((item) => item.id === team.id ? { ...item, project: saved } : item))
+      setProjects((current) => current.map((project) => project.id === projectId ? { ...project, team_id: team.id } : project.id === team.project?.id ? { ...project, team_id: null } : project))
+      setTeamMemberDrafts((current) => ({ ...current, [`project:${team.id}`]: '' }))
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to associate project with team.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const changeLeader = async (team: TeamRecord, participantId: string) => {
     setLoading(true)
     try {
@@ -195,6 +214,22 @@ export function Admin() {
     }
   }
 
+  const removeProject = async (team: TeamRecord) => {
+    if (!team.project) return
+    if (!window.confirm(`Delete project ${team.project.project_name}? Its scores and pitch data will also be deleted.`)) return
+    setLoading(true)
+    try {
+      await deleteProject(team.project.id)
+      setTeams((current) => current.map((item) => item.id === team.id ? { ...item, project: null } : item))
+      setStats((current) => ({ ...current, projects: Math.max(0, current.projects - 1) }))
+      setEditingTeamId(null)
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to delete project.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const filteredJury = useMemo(() => {
     const normalized = juryQuery.trim().toLowerCase()
     if (!normalized) return juryMembers
@@ -212,7 +247,7 @@ export function Admin() {
       ['created_at', 'Submitted at'], ['first_name', 'First name'], ['last_name', 'Last name'],
       ['email', 'Email'], ['phone', 'Phone'], ['age', 'Age'], ['city', 'City'], ['country', 'Country'],
       ['school', 'School'], ['company', 'Company'], ['position', 'Position'], ['experience_level', 'Experience'],
-      ['skills', 'Skills'], ['has_team', 'Has team'], ['looking_for_teammates', 'Looking for teammates'],
+      ['has_team', 'Has team'], ['looking_for_teammates', 'Looking for teammates'],
     ] as const
     const csv = [
       columns.map(([, label]) => toCsvCell(label)).join(','),
@@ -335,7 +370,7 @@ export function Admin() {
                 <tr key={team.id}>
                   <td><strong>{team.team_name}</strong>{team.slogan && <small className="admin-cell-subtitle">{team.slogan}</small>}</td>
                   <td><div className="admin-member-list">{team.members.length ? team.members.map((member) => <span key={member.participant_id}>{member.name}{member.is_leader ? ' (leader)' : ''}<small>{member.email}</small>{!member.is_leader && <button className="admin-text-btn" onClick={() => void changeLeader(team, member.participant_id)}>Make leader</button>}</span>) : 'No members'}</div><div className="admin-member-add"><select value={teamMemberDrafts[team.id] || ''} onChange={(event) => setTeamMemberDrafts((current) => ({ ...current, [team.id]: event.target.value }))}><option value="">Add participant...</option>{records.filter((record) => !team.members.some((member) => member.participant_id === record.id)).map((record) => <option value={record.id} key={record.id}>{record.first_name} {record.last_name}</option>)}</select><button className="admin-text-btn" onClick={() => void addMemberToTeam(team)}>Add</button></div></td>
-                  <td><strong>{team.project?.project_name || '—'}</strong>{team.project?.category && <small className="admin-cell-subtitle">{team.project.category}</small>}{team.project && <button className="admin-text-btn" onClick={() => { setTeamProjectDraft({ project_name: team.project?.project_name || '', category: team.project?.category || '', description: team.project?.description || '', problem_statement: team.project?.problem_statement || '', solution: team.project?.solution || '' }); setEditingTeamId(team.id) }}>Edit project</button>}</td>
+                  <td><strong>{team.project?.project_name || '—'}</strong>{team.project?.category && <small className="admin-cell-subtitle">{team.project.category}</small>}<div className="admin-project-actions"><select className="admin-project-select" value={teamMemberDrafts[`project:${team.id}`] || ''} onChange={(event) => setTeamMemberDrafts((current) => ({ ...current, [`project:${team.id}`]: event.target.value }))}><option value="">{team.project ? 'Change project...' : 'Associate project...'}</option>{projects.filter((project) => project.team_id === null || project.id === team.project?.id).map((project) => <option value={project.id} key={project.id}>{project.project_name}</option>)}</select><button className="admin-text-btn" disabled={!teamMemberDrafts[`project:${team.id}`] || loading} onClick={() => void associateProject(team)}>Associate</button>{team.project && <><button className="admin-text-btn" onClick={() => { setTeamProjectDraft({ project_name: team.project?.project_name || '', category: team.project?.category || '', description: team.project?.description || '', problem_statement: team.project?.problem_statement || '', solution: team.project?.solution || '' }); setEditingTeamId(team.id) }}>Edit project</button><button className="admin-text-btn danger-text" onClick={() => void removeProject(team)}>Delete project</button></>}</div></td>
                   <td>{new Date(team.created_at).toLocaleDateString()}</td>
                   <td className="admin-row-actions"><button className="admin-icon-btn" title="Edit team" onClick={() => { setEditingTeamId(team.id); setTeamDraft({ team_name: team.team_name, slogan: team.slogan || '' }) }}><Pencil size={15} /></button><button className="admin-icon-btn danger" title="Delete team" onClick={() => void removeTeam(team)}><Trash2 size={15} /></button></td>
                 </tr>
@@ -352,13 +387,13 @@ export function Admin() {
           </div>
           <div className="admin-table-wrap">
             <table className="admin-table">
-              <thead><tr><th>#</th><th>Name</th><th>Email</th><th>City</th><th>Experience</th><th>Skills</th><th>Team</th><th>Submitted</th></tr></thead>
+              <thead><tr><th>#</th><th>Name</th><th>Email</th><th>City</th><th>Experience</th><th>Team</th><th>Submitted</th></tr></thead>
               <tbody>
                 {filtered.map((record, index) => (
                   <tr key={record.id}>
                     <td>{index + 1}</td><td>{record.first_name} {record.last_name}</td><td>{record.email}</td>
                     <td>{record.city}, {record.country}</td><td>{record.experience_level || '—'}</td>
-                    <td>{record.skills.join(', ') || '—'}</td><td>{record.has_team ? 'Yes' : 'Solo'}</td>
+                    <td>{record.has_team ? 'Yes' : 'Solo'}</td>
                     <td>{new Date(record.created_at).toLocaleString()}</td>
                   </tr>
                 ))}

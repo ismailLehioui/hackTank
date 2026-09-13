@@ -110,17 +110,6 @@ export function Home() {
         <CountdownClock />
       </section>
 
-      {/* SHARKS */}
-      <section className="sharks section" id="sharks">
-        <SectionHeader label="/ 03 — THE PANEL" title="Meet" accent="the Sharks." text="The investors and mentors who will challenge, question and back your venture." dark />
-        <div className="shark-grid">
-          {sharks.slice(0, 3).map((shark) => (
-            <Reveal key={shark.name}><SharkCard shark={shark} /></Reveal>
-          ))}
-        </div>
-        <div className="section-cta"><Link className="ghost-button" to="/sharks">See the full panel <span>↗</span></Link></div>
-      </section>
-
       {/* PRIZES */}
       <section className="prizes section">
         <SectionHeader label="/ 04 — THE STAKES" title="Deals worth" accent="pitching for." />

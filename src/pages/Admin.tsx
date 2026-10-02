@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Download, LogOut, Pencil, Plus, RefreshCw, Save, Trash2, Users, X } from 'lucide-react'
 import { Brand } from '../components/Brand'
-import { addParticipantToTeam, associateProjectToTeam, createJuryMember, deleteJuryMember, deleteProject, deleteTeam, getAdminProjects, getCurrentUserRole, getDashboardStats, getJuryMembers, getParticipants, getTeams, isSupabaseConfigured, setTeamLeader, updateJuryMember, updateProject, updateTeam, type AdminProjectRecord, type DashboardStats, type JuryMemberRecord, type ParticipantRecord, type TeamRecord } from '../services/registrations'
+import { addParticipantToTeam, associateProjectToTeam, createJuryMember, deleteJuryMember, deleteProject, deleteTeam, getAdminProjects, getCurrentUserRole, getDashboardStats, getJuryMembers, getParticipants, getTeams, isSupabaseConfigured, setTeamLeader, updateJuryMember, updatePaymentStatus, updateProject, updateTeam, type AdminProjectRecord, type DashboardStats, type JuryMemberRecord, type ParticipantRecord, type TeamRecord } from '../services/registrations'
 import { supabase } from '../services/supabase'
 
 const EMPTY_STATS: DashboardStats = { participants: 0, teams: 0, projects: 0, mentors: 0, jury: 0, sponsors: 0 }
@@ -75,7 +75,7 @@ export function Admin() {
     const normalized = query.trim().toLowerCase()
     if (!normalized) return records
     return records.filter((record) =>
-      [record.first_name, record.last_name, record.email, record.city, record.experience_level]
+      [record.first_name, record.last_name, record.email, record.school, record.experience_level]
         .join(' ')
         .toLowerCase()
         .includes(normalized),
@@ -116,6 +116,16 @@ export function Admin() {
       setDataError(error instanceof Error ? error.message : 'Unable to save jury member.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const changePaymentStatus = async (participant: ParticipantRecord, status: 'verified' | 'rejected') => {
+    setDataError('')
+    try {
+      const updated = await updatePaymentStatus(participant.id, status)
+      setRecords((current) => current.map((record) => record.id === updated.id ? updated : record))
+    } catch (error) {
+      setDataError(error instanceof Error ? error.message : 'Unable to update payment status.')
     }
   }
 
@@ -245,9 +255,10 @@ export function Admin() {
   const exportCsv = () => {
     const columns = [
       ['created_at', 'Submitted at'], ['first_name', 'First name'], ['last_name', 'Last name'],
-      ['email', 'Email'], ['phone', 'Phone'], ['age', 'Age'], ['city', 'City'], ['country', 'Country'],
-      ['school', 'School'], ['company', 'Company'], ['position', 'Position'], ['experience_level', 'Experience'],
-      ['has_team', 'Has team'], ['looking_for_teammates', 'Looking for teammates'],
+      ['email', 'Email'], ['phone', 'Phone'], ['age', 'Age'], ['school', 'School'], ['company', 'Company'],
+      ['position', 'Position'], ['experience_level', 'Experience'], ['has_team', 'Has team'],
+      ['looking_for_teammates', 'Looking for teammates'], ['payment_status', 'Payment status'],
+      ['payment_method', 'Payment method'], ['payment_reference', 'Payment reference'],
     ] as const
     const csv = [
       columns.map(([, label]) => toCsvCell(label)).join(','),
@@ -383,17 +394,25 @@ export function Admin() {
         <section className="admin-section">
           <div className="admin-section-head">
             <div><h2>Participants</h2><p>All applications submitted through the public registration form.</p></div>
-            <input className="admin-search" placeholder="Search name, email, city, skill..." value={query} onChange={(event) => setQuery(event.target.value)} />
+            <input className="admin-search" placeholder="Search name, email, school, skill..." value={query} onChange={(event) => setQuery(event.target.value)} />
           </div>
           <div className="admin-table-wrap">
             <table className="admin-table">
-              <thead><tr><th>#</th><th>Name</th><th>Email</th><th>City</th><th>Experience</th><th>Team</th><th>Submitted</th></tr></thead>
+              <thead><tr><th>#</th><th>Name</th><th>Email</th><th>School</th><th>Experience</th><th>Team</th><th>Payment</th><th>Submitted</th></tr></thead>
               <tbody>
                 {filtered.map((record, index) => (
                   <tr key={record.id}>
                     <td>{index + 1}</td><td>{record.first_name} {record.last_name}</td><td>{record.email}</td>
-                    <td>{record.city}, {record.country}</td><td>{record.experience_level || '—'}</td>
-                    <td>{record.has_team ? 'Yes' : 'Solo'}</td>
+                    <td>{record.school || '—'}</td><td>{record.experience_level || '—'}</td>
+                    <td>{record.has_team ? 'Yes' : '—'}</td>
+                    <td>
+                      <strong>{record.payment_status}</strong>
+                      <small className="admin-cell-subtitle">{record.payment_method || '—'}{record.payment_reference ? ` · ${record.payment_reference}` : ''}</small>
+                      <div className="admin-row-actions">
+                        {record.payment_status !== 'verified' && <button className="admin-text-btn" type="button" onClick={() => void changePaymentStatus(record, 'verified')}>Verify</button>}
+                        {record.payment_status !== 'rejected' && <button className="admin-text-btn danger-text" type="button" onClick={() => void changePaymentStatus(record, 'rejected')}>Reject</button>}
+                      </div>
+                    </td>
                     <td>{new Date(record.created_at).toLocaleString()}</td>
                   </tr>
                 ))}

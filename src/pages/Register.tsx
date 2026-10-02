@@ -10,10 +10,12 @@ const STEP_LABELS = ['Participant', 'Background', 'Venture', 'Review']
 const STORAGE_KEY = 'hacktank-registration'
 
 const emptyData: RegistrationData = {
-  firstName: '', lastName: '', email: '', phone: '', age: '', city: '', country: '',
+  firstName: '', lastName: '', email: '', phone: '', age: '',
+  profileType: 'student',
   university: '', company: '', position: '', experience: '',
-  hasTeam: '',
+  hasTeam: 'Yes, we’re a team',
   teamName: '', acceptRules: false,
+  paymentMethod: '', paymentReference: '', paymentCommitment: false,
 }
 
 function loadDraft(): RegistrationData {
@@ -53,11 +55,21 @@ export function Register() {
       if (!emailPattern.test(data.email)) next.email = 'Enter a valid email'
       if (!data.phone.trim()) next.phone = 'Required'
       if (!data.age || Number(data.age) < 15 || Number(data.age) > 99) next.age = 'Enter a valid age'
-      if (!data.city.trim()) next.city = 'Required'
-      if (!data.country.trim()) next.country = 'Required'
     }
     if (step === 2) {
       if (!data.experience) next.experience = 'Choose your level'
+      if (!data.position.trim()) next.position = 'Required'
+
+      if (data.profileType === 'student') {
+        if (!data.university.trim()) next.university = 'Required'
+      } else {
+        if (!data.company.trim()) next.company = 'Required'
+      }
+    }
+    if (step === 3) {
+      if (!data.teamName.trim()) next.teamName = 'Team name is required'
+      if (!data.paymentMethod) next.paymentMethod = 'Choose a payment method'
+      if (!data.paymentCommitment) next.paymentCommitment = 'Please confirm your payment commitment'
     }
     if (step === 4) {
       if (!data.acceptRules) next.acceptRules = 'Please accept to continue'
@@ -104,7 +116,7 @@ export function Register() {
           <div className="success-mark"><Check size={34} /></div>
           <div className="section-label">/ YOU’RE IN THE TANK</div>
           <h1>Now go build<br /><em>something bold.</em></h1>
-          <p>Your application is in, {data.firstName || 'builder'}. We’ll email <b>{data.email}</b> with everything you need to prepare your pitch.</p>
+          <p>Your application is received, {data.firstName || 'builder'}. It will remain pending until your payment is verified. We’ll email <b>{data.email}</b> with the next steps.</p>
           <div className="success-actions">
             <Link className="primary" to="/">Back to home <span>↗</span></Link>
           </div>
@@ -153,8 +165,6 @@ export function Register() {
                 <Field label="Email address" error={errors.email}><input type="email" value={data.email} onChange={(e) => update('email', e.target.value)} placeholder="you@email.com" /></Field>
                 <Field label="Phone number" error={errors.phone}><input value={data.phone} onChange={(e) => update('phone', e.target.value)} placeholder="+216" /></Field>
                 <Field label="Age" error={errors.age}><input type="number" value={data.age} onChange={(e) => update('age', e.target.value)} placeholder="24" /></Field>
-                <Field label="City" error={errors.city}><input value={data.city} onChange={(e) => update('city', e.target.value)} placeholder="Sousse" /></Field>
-                <Field label="Country" error={errors.country}><input value={data.country} onChange={(e) => update('country', e.target.value)} placeholder="Tunisia" /></Field>
               </div>
             </>
           )}
@@ -162,11 +172,44 @@ export function Register() {
           {step === 2 && (
             <>
               <h2>Tell us about<br /><span>your background.</span></h2>
-              <p className="form-hint">This helps us understand your current studies or work situation.</p>
+              <p className="form-hint">Choose the profile that matches you best and complete the required fields.</p>
+
+              <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+                {[
+                  { value: 'student', label: 'Student' },
+                  { value: 'other', label: 'Professional / Other' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => update('profileType', option.value as 'student' | 'other')}
+                    style={{
+                      flex: 1,
+                      minWidth: 180,
+                      borderRadius: 14,
+                      border: data.profileType === option.value ? '1px solid rgba(115,149,255,0.7)' : '1px solid rgba(255,255,255,0.12)',
+                      background: data.profileType === option.value ? 'rgba(115,149,255,0.14)' : 'rgba(255,255,255,0.02)',
+                      color: '#f5f7ff',
+                      padding: '0.9rem 1rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="input-grid">
-                <Field label="School or university (optional)"><input value={data.university} onChange={(e) => update('university', e.target.value)} placeholder="e.g. University of Sousse" /></Field>
-                <Field label="Current company (optional)"><input value={data.company} onChange={(e) => update('company', e.target.value)} placeholder="e.g. Acme or freelance" /></Field>
-                <Field label="Current role (optional)"><input value={data.position} onChange={(e) => update('position', e.target.value)} placeholder="e.g. Student, Developer, Founder" /></Field>
+                {data.profileType === 'student' ? (
+                  <Field label="School or university *" error={errors.university}><input value={data.university} onChange={(e) => update('university', e.target.value)} placeholder="e.g. University of Sousse" /></Field>
+                ) : (
+                  <Field label="Current company *" error={errors.company}><input value={data.company} onChange={(e) => update('company', e.target.value)} placeholder="e.g. Acme or freelance" /></Field>
+                )}
+
+                <Field label="Current role *" error={errors.position}><input value={data.position} onChange={(e) => update('position', e.target.value)} placeholder="e.g. Student, Developer, Founder" /></Field>
+
                 <Field label="Experience in your field *" error={errors.experience}>
                   <select value={data.experience} onChange={(e) => update('experience', e.target.value)}>
                     <option value="" disabled>Select your level</option>
@@ -181,8 +224,21 @@ export function Register() {
             <>
               <h2>Team up for<br /><span>the Tank.</span></h2>
               <div className="input-grid single">
-                <Field label="Team name (optional)"><input value={data.teamName} onChange={(e) => update('teamName', e.target.value)} placeholder="Something people remember" /></Field>
+                <Field label="Team name" error={errors.teamName}><input value={data.teamName} onChange={(e) => update('teamName', e.target.value)} placeholder="Something people remember" /></Field>
+                <Field label="Payment method" error={errors.paymentMethod}>
+                  <select value={data.paymentMethod} onChange={(e) => update('paymentMethod', e.target.value)}>
+                    <option value="" disabled>Select a method</option>
+                    <option value="Bank transfer">Bank transfer</option>
+                    <option value="Organizer payment">Payment to an organizer</option>
+                  </select>
+                </Field>
+                <Field label="Payment reference (optional)"><input value={data.paymentReference} onChange={(e) => update('paymentReference', e.target.value)} placeholder="Transaction or receipt reference" /></Field>
               </div>
+              <label className={`inline-check ${errors.paymentCommitment ? 'has-error' : ''}`}>
+                <input type="checkbox" checked={data.paymentCommitment} onChange={(e) => update('paymentCommitment', e.target.checked)} />
+                <span>I commit to paying the participation fee before the deadline. I understand that my registration remains pending until payment is verified.</span>
+              </label>
+              {errors.paymentCommitment && <p className="field-error">{errors.paymentCommitment}</p>}
             </>
           )}
 
@@ -192,9 +248,11 @@ export function Register() {
               <div className="review">
                 <ReviewRow label="Name" value={`${data.firstName} ${data.lastName}`.trim() || '—'} />
                 <ReviewRow label="Email" value={data.email || '—'} />
-                <ReviewRow label="Location" value={[data.city, data.country].filter(Boolean).join(', ') || '—'} />
+                <ReviewRow label="Profile" value={data.profileType === 'student' ? 'Student' : 'Professional / Other'} />
+                <ReviewRow label="Background" value={data.profileType === 'student' ? (data.university || '—') : (data.company || '—')} />
                 <ReviewRow label="Experience" value={data.experience || '—'} />
-                <ReviewRow label="Team" value={data.hasTeam || '—'} />
+                <ReviewRow label="Team" value={data.teamName || '—'} />
+                <ReviewRow label="Payment" value={data.paymentMethod || '—'} />
               </div>
               <label className={`inline-check ${errors.acceptRules ? 'has-error' : ''}`}>
                 <input type="checkbox" checked={data.acceptRules} onChange={(e) => update('acceptRules', e.target.checked)} />

@@ -57,13 +57,15 @@ export type RegistrationData = {
   email: string;
   phone: string;
   age: string;
-  city: string;
-  country: string;
+  profileType: "student" | "other";
   university: string;
   company: string;
   position: string;
   experience: string;
   hasTeam: string;
   teamName: string;
+  paymentMethod: string;
+  paymentReference: string;
+  paymentCommitment: boolean;
   acceptRules: boolean;
 };

@@ -8,14 +8,18 @@ export type ParticipantRecord = {
   email: string;
   phone: string;
   age: number;
-  city: string;
-  country: string;
   school: string | null;
   company: string | null;
   position: string | null;
   experience_level: string | null;
   has_team: boolean;
   looking_for_teammates: boolean;
+  payment_status: "pending" | "verified" | "rejected";
+  payment_method: string | null;
+  payment_reference: string | null;
+  payment_commitment: boolean;
+  payment_verified_at: string | null;
+  payment_notes: string | null;
   created_at: string;
 };
 
@@ -84,8 +88,6 @@ export async function submitRegistration(data: RegistrationData) {
     p_email: data.email,
     p_phone: data.phone,
     p_age: Number(data.age),
-    p_city: data.city,
-    p_country: data.country,
     p_school: data.university,
     p_company: data.company,
     p_position: data.position,
@@ -97,9 +99,26 @@ export async function submitRegistration(data: RegistrationData) {
     p_idea: "",
     p_problem: "",
     p_looking_for_teammates: false,
+    p_payment_method: data.paymentMethod,
+    p_payment_reference: data.paymentReference,
+    p_payment_commitment: data.paymentCommitment,
   });
 
   if (error) throw error;
+}
+
+export async function updatePaymentStatus(
+  participantId: string,
+  status: "verified" | "rejected",
+) {
+  if (!supabase) throw new Error("Supabase is not configured");
+  const { data, error } = await supabase.rpc("set_payment_status", {
+    p_participant_id: participantId,
+    p_status: status,
+    p_notes: null,
+  });
+  if (error) throw error;
+  return data as ParticipantRecord;
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {

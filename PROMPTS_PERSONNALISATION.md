@@ -14,7 +14,7 @@ Dans src/data.ts, mets à jour l'objet EVENT avec les vraies infos :
 - name, org, tagline
 - location = "<ville, pays réels>"
 - dates = "<dates réelles>"
-- startsAt = "<date ISO réelle, ex: 2026-10-3T09:00:00>" (utilisé par le compte à rebours)
+- startsAt = "<date ISO réelle, ex: 2026-10-7T09:00:00>" (utilisé par le compte à rebours)
 ```
 
 ### Statistiques

@@ -32,7 +32,7 @@ export function Faq() {
           <a href="mailto:hello@hacktank.tn"><Mail size={16} /> hello@hacktank.tn</a>
           <a href="tel:+21600000000"><Phone size={16} /> +216 00 000 000</a>
           <span><MapPin size={16} /> {EVENT.location}</span>
-          <Link className="primary" to="/register">Enter the Tank <span>↗</span></Link>
+          <Link className="primary" to="/register">Enter the Tank </Link>
         </aside>
       </section>
     </div>

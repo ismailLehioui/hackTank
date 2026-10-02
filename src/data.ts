@@ -13,7 +13,7 @@ export const EVENT = {
   org: "JCI Sousse",
   tagline: "Where builders pitch the sharks.",
   location: "Sousse, Tunisia",
-  dates: "October 3 — 4, 2026",
+  dates: "October 17 — 18, 2026",
   startsAt: new Date("2026-10-03T09:00:00").toISOString(),
 };
 
@@ -27,8 +27,8 @@ export const NAV_LINKS = [
 export const STATS: Stat[] = [
   { value: "24", label: "Hours to build & pitch" },
   { value: "01", label: "Pitch stage" },
-  { value: "50K", label: "TND in deals" },
-  { value: "12", label: "Sharks on the panel" },
+  // { value: "50K", label: "TND in deals" },
+  { value: "3", label: "Sharks on the panel" },
 ];
 
 export const HOW_IT_WORKS = [
@@ -50,7 +50,7 @@ export const HOW_IT_WORKS = [
   {
     step: "04",
     title: "Secure the deal",
-    text: "The best pitches leave with funding, mentorship and momentum.",
+    text: "The best pitches lesve with cash prizes, exposure, and momentum.",
   },
 ];
 
@@ -159,39 +159,57 @@ export const SHARKS: Shark[] = [
 export const TIMELINE: TimelineStep[] = [
   {
     phase: "01",
-    title: "Registration open",
-    date: "May 01 — June 10",
-    detail: "Claim your spot in the Tank, solo or as a team.",
+    title: "Participant welcome",
+    date: "Day 1 – Saturday, 17 October 2026",
+    detail:
+      "Participant registration, partner and guest welcome, opening conference.",
   },
   {
     phase: "02",
-    title: "Team formation",
-    date: "June 11 — 13",
-    detail: "Find teammates and shape your venture.",
+    title: "Inspiring talks",
+    date: "11:00",
+    detail: "Entrepreneur and expert testimonials, networking session, lunch.",
   },
   {
     phase: "03",
-    title: "Build sprint",
-    date: "June 14 — 15",
-    detail: "24 hours to build with mentors on standby.",
+    title: "Workshops & training",
+    date: "Afternoon",
+    detail:
+      "Hands-on workshops led by experts, participant preparation for the Hackathon.",
   },
   {
     phase: "04",
-    title: "Pitch the Sharks",
-    date: "June 16 · 14:00",
-    detail: "Five minutes on stage to win the panel.",
+    title: "Hackathon launch",
+    date: "Event start",
+    detail:
+      "Theme announcement, team formation, start of the 24 hours of innovation.",
   },
   {
     phase: "05",
-    title: "Deliberation",
-    date: "June 16 · 17:00",
-    detail: "The Sharks debate and score every venture.",
+    title: "Working night",
+    date: "Day 1 – evening",
+    detail: "Mentor support, social activities, coffee break and dinner.",
   },
   {
     phase: "06",
-    title: "Deals & awards",
-    date: "June 16 · 19:00",
-    detail: "Funding, mentorship and the winning handshake.",
+    title: "Hackathon continuation & finalization",
+    date: "Day 2 – Sunday, 18 October 2026",
+    detail:
+      "Breakfast, continuation of the Hackathon, project finalization, team coaching.",
+  },
+  {
+    phase: "07",
+    title: "Pitches & evaluation",
+    date: "Morning",
+    detail:
+      "Presentation preparation, pitches before the jury, finalists presentation.",
+  },
+  {
+    phase: "08",
+    title: "Closing ceremony",
+    date: "Event closing",
+    detail:
+      "Jury evaluation, winner announcement, awards ceremony, closing remarks.",
   },
 ];
 

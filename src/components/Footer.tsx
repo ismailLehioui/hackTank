@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Mail } from 'lucide-react'
 import { Brand } from './Brand'
-import { GithubIcon, InstagramIcon, LinkedinIcon } from './icons'
+import { InstagramIcon, LinkedinIcon } from './icons'
 import { EVENT, NAV_LINKS } from '../data'
 
 export function Footer() {
@@ -11,10 +11,18 @@ export function Footer() {
         <div className="footer-brand">
           <Brand />
           <p>{EVENT.tagline}<br />Powered by {EVENT.org}.</p>
+          <div className="organizer-mark" aria-label="Organized by JCI Sousse">
+            <img
+              src="/jci_sousse.jpeg"
+              alt="JCI Sousse"
+              onError={(event) => { event.currentTarget.hidden = true }}
+            />
+            <span>ORGANIZED BY</span>
+            <strong>JCI SOUSSE</strong>
+          </div>
           <div className="footer-social">
-            <a href="#" aria-label="LinkedIn"><LinkedinIcon size={18} /></a>
-            <a href="#" aria-label="Instagram"><InstagramIcon size={18} /></a>
-            <a href="#" aria-label="GitHub"><GithubIcon size={18} /></a>
+            <a href="https://www.linkedin.com/company/jci-sousse/home/" target="_blank" rel="noreferrer" aria-label="JCI Sousse on LinkedIn"><LinkedinIcon size={18} /></a>
+            <a href="https://www.instagram.com/jcisousse/" target="_blank" rel="noreferrer" aria-label="JCI Sousse on Instagram"><InstagramIcon size={18} /></a>
             <a href="mailto:hello@hacktank.tn" aria-label="Email"><Mail size={18} /></a>
           </div>
         </div>

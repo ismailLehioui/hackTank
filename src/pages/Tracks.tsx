@@ -46,7 +46,7 @@ export function Tracks() {
       <section className="cta-band">
         <p className="section-label">/ YOUR MOVE</p>
         <h2>Found your<br /><span>arena?</span></h2>
-        <Link className="primary" to="/register">Enter the Tank <span>↗</span></Link>
+        <Link className="primary" to="/register">Enter the Tank </Link>
       </section>
     </div>
   )

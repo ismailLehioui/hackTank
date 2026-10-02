@@ -46,17 +46,21 @@ export function Home() {
         <div className="hero-copy">
           <p className="eyebrow"><i /> {EVENT.org.toUpperCase()} PRESENTS <span>—</span> 2026</p>
           <div className="hero-heading-space" aria-hidden="true" />
-          <p className="hero-text">A 48-hour build sprint where bold teams turn raw ideas into ventures — then pitch them live to a panel of sharks.</p>
+          <p className="hero-text">A 24-hour build sprint where bold teams turn raw ideas into ventures — then pitch them live to a panel of sharks.</p>
           <div className="hero-actions">
-            <Link className="primary" to="/register">Enter the Tank <span>↗</span></Link>
+            <Link className="primary" to="/register">Enter the Tank 
+            {/* <span>↗</span> */}
+            </Link>
             <a className="text-link" href="#concept">How it works <span>↓</span></a>
           </div>
         </div>
         <div className="hero-note">
-          <span>01</span>
+          {/* <span>01</span> */}
           <div>
-            <b>PITCH THE SHARKS.<br />WIN THE DEAL.</b>
-            <small>{EVENT.dates}<br />{EVENT.location}</small>
+            {EVENT.dates}<br />
+            <b>{EVENT.location}<br />L'Orien Palace Hotel</b>
+            {/* <small>{EVENT.dates}<br /></small> */}
+            
           </div>
         </div>
         <div className="scroll-cue">SCROLL TO EXPLORE <span>↓</span></div>
@@ -68,8 +72,9 @@ export function Home() {
           <Reveal><h2>Inspired by<br /><span>Shark Tank.</span></h2></Reveal>
           <Reveal delay={100}>
             <div>
-              <p className="lead">Hack Tank turns the hackathon into a startup arena. Build for 24 hours, then step on stage and pitch your venture to real investors and mentors — the Sharks.</p>
-              <p>Powered by {EVENT.org}, it is your shot to defend a bold idea, win the panel over, and walk away with funding, mentorship and momentum.</p>
+              {/* <p className="lead">Hack Tank turns the hackathon into a startup arena. Build for 24 hours, then step on stage and pitch your venture to real investors and mentors — the Sharks.</p> */}
+              <p className="lead">The best pitches lesve with cash prizes, exposure, and momentum.</p>
+              <p>Powered by {EVENT.org}, it is your shot to defend a bold idea, win the panel over, and walk away with cash prizes, exposure, and momentum.</p>
               <Link className="circle-link" to="/register">Step into the Tank <span>↗</span></Link>
             </div>
           </Reveal>
@@ -114,7 +119,7 @@ export function Home() {
         <Reveal>
           <p className="section-label">/ YOUR MOVE</p>
           <h2>Ready to face<br /><span>the Sharks?</span></h2>
-          <Link className="primary" to="/register">Enter the Tank <span>↗</span></Link>
+          <Link className="primary" to="/register">Enter the Tank </Link>
         </Reveal>
       </section>
     </>

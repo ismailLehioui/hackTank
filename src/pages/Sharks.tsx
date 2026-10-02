@@ -39,7 +39,7 @@ export function Sharks() {
       <section className="cta-band">
         <p className="section-label">/ YOUR MOVE</p>
         <h2>Think you can<br /><span>win them over?</span></h2>
-        <Link className="primary" to="/register">Enter the Tank <span>↗</span></Link>
+        <Link className="primary" to="/register">Enter the Tank </Link>
       </section>
     </div>
   )

@@ -23,11 +23,12 @@ export function Navbar() {
           </NavLink>
         ))}
         <Link to="/register" className="nav-cta mobile-only" onClick={() => setOpen(false)}>
-          Enter the Tank <span>↗</span>
+          Enter the Tank 
+          {/* <span>↗</span> */}
         </Link>
       </nav>
       <div className="nav-actions">
-        <Link to="/register" className="nav-cta desktop-only">Enter the Tank <span>↗</span></Link>
+        <Link to="/register" className="nav-cta desktop-only">Enter the Tank</Link>
         <button className="nav-toggle" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>

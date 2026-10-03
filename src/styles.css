@@ -32,7 +32,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 @keyframes pop { from { transform: scale(.5); opacity: 0; } }
 
 /* NAV */
-.nav { height: 84px; padding: 0 5vw; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,.12); position: fixed; z-index: 50; top: 0; left: 0; right: 0; background: rgba(8,17,29,.72); backdrop-filter: blur(14px); }
+.nav { height: 84px; padding: 0 5vw; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 20px; border-bottom: 1px solid rgba(255,255,255,.12); position: fixed; z-index: 50; top: 0; left: 0; right: 0; background: rgba(8,17,29,.72); backdrop-filter: blur(14px); }
+.nav-brand-group { min-width: 0; display: flex; align-items: center; gap: 9px; }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: 2px; font-weight: 700; }
 .brand-hack { color: var(--blue); }
 .brand b { color: var(--gold); }
@@ -42,7 +43,11 @@ ul { margin: 0; padding: 0; list-style: none; }
 .nav-links a:hover { color: #fff; }
 .nav-links a.active { color: #fff; }
 .nav-links a.active::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 100%; height: 2px; background: var(--gold); }
-.nav-actions { display: flex; align-items: center; gap: 14px; }
+.nav-actions { justify-self: end; display: flex; align-items: center; gap: 14px; }
+.nav-jci-logo { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 38px; flex: 0 0 68px; padding: 4px 6px; overflow: hidden; border: 1px solid rgba(210, 221, 233, .82); border-radius: 4px; background: #f8fafc; transition: background-color .2s ease, border-color .2s ease; }
+.nav-jci-logo::after { content: ''; position: absolute; top: 8px; right: -7px; height: 20px; border-right: 1px solid rgba(211, 222, 234, .42); }
+.nav-jci-logo:hover { border-color: #fff; background: #fff; }
+.nav-jci-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .nav-cta, .primary { background: var(--gold); color: #07111e; padding: 14px 19px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; }
 .nav-cta span, .primary span { margin-left: 18px; font-size: 15px; }
 .primary:hover, .nav-cta:hover { transform: translaProject "hacktank" is paused
@@ -341,7 +346,8 @@ To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12p
 
 /* RESPONSIVE */
 @media (max-width: 980px) {
-  .nav { height: 70px; padding: 0 6vw; }
+  .nav { height: 70px; padding: 0 6vw; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+  .nav-jci-logo { width: 58px; height: 32px; flex-basis: 58px; }
   .nav-toggle { display: grid; }
   .desktop-only { display: none; }
   .mobile-only { display: inline-flex; }

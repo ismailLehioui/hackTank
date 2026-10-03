@@ -9,7 +9,12 @@ export function Navbar() {
 
   return (
     <header className="nav">
-      <Brand onClick={() => setOpen(false)} />
+      <div className="nav-brand-group">
+        <Link to="/" className="nav-jci-logo" aria-label="JCI Sousse home" onClick={() => setOpen(false)}>
+          <img src="/jci_sousse-removebg-preview.png" alt="JCI Sousse" />
+        </Link>
+        <Brand onClick={() => setOpen(false)} />
+      </div>
       <nav className={`nav-links ${open ? 'open' : ''}`}>
         {NAV_LINKS.map((link) => (
           <NavLink

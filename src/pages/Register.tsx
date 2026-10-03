@@ -99,12 +99,11 @@ export function Register() {
       if (!data.age || Number(data.age) < 15 || Number(data.age) > 99) next.age = 'Enter a valid age'
     }
     if (step === 1) {
-      if (!data.position.trim()) next.position = 'Required'
-
       if (data.profileType === 'student') {
         if (!data.university.trim()) next.university = 'Required'
       } else {
         if (!data.company.trim()) next.company = 'Required'
+        if (!data.position.trim()) next.position = 'Required'
       }
     }
     if (step === 2) {
@@ -121,8 +120,10 @@ export function Register() {
         if (!member.phone.trim()) next[`${baseKey}-phone`] = 'Required'
         if (!member.age || Number(member.age) < 15 || Number(member.age) > 99) next[`${baseKey}-age`] = 'Enter a valid age'
         if (member.profileType === 'student' && !member.university.trim()) next[`${baseKey}-university`] = 'Required'
-        if (member.profileType === 'other' && !member.company.trim()) next[`${baseKey}-company`] = 'Required'
-        if (!member.position.trim()) next[`${baseKey}-position`] = 'Required'
+        if (member.profileType === 'other') {
+          if (!member.company.trim()) next[`${baseKey}-company`] = 'Required'
+          if (!member.position.trim()) next[`${baseKey}-position`] = 'Required'
+        }
       })
     }
     if (step === 3) {
@@ -310,7 +311,7 @@ export function Register() {
                 <ReviewRow label="Email" value={data.email || '—'} />
                 <ReviewRow label="Profile" value={data.profileType === 'student' ? 'Student' : 'Professional / Other'} />
                 <ReviewRow label={data.profileType === 'student' ? 'School or university' : 'Current company'} value={data.profileType === 'student' ? (data.university || '—') : (data.company || '—')} />
-                <ReviewRow label="Current role" value={data.position || '—'} />
+                {data.profileType === 'other' && <ReviewRow label="Current role" value={data.position || '—'} />}
                 <ReviewRow label="Team" value={data.teamName || '—'} />
                 <ReviewRow label="Payment" value={data.paymentMethod || '—'} />
                 <ReviewRow label="Teammates" value={String(data.teamMembers.length)} />
@@ -391,9 +392,11 @@ function ProfileFields({
             <input value={value.company} onChange={(event) => onChange('company', event.target.value)} placeholder="e.g. Acme or freelance" />
           </Field>
         )}
-        <Field label="Current role *" error={errors[`${errorPrefix}position`]}>
-          <input value={value.position} onChange={(event) => onChange('position', event.target.value)} placeholder="e.g. Student, Developer, Founder" />
-        </Field>
+        {value.profileType === 'other' && (
+          <Field label="Current role *" error={errors[`${errorPrefix}position`]}>
+            <input value={value.position} onChange={(event) => onChange('position', event.target.value)} placeholder="e.g. Developer, Founder" />
+          </Field>
+        )}
       </div>
     </div>
   )

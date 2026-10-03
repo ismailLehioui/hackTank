@@ -153,7 +153,7 @@ export async function submitRegistration(data: RegistrationData) {
     p_age: Number(data.age),
     p_school: data.profileType === "student" ? data.university : "",
     p_company: data.profileType === "other" ? data.company : "",
-    p_position: data.position,
+    p_position: data.profileType === "student" ? "Student" : data.position,
     p_skills: [],
     p_has_team: data.hasTeam === "Yes, we’re a team",
     p_team_name: data.teamName,
@@ -172,7 +172,7 @@ export async function submitRegistration(data: RegistrationData) {
       age: Number(member.age),
       school: member.profileType === "student" ? member.university : "",
       company: member.profileType === "other" ? member.company : "",
-      position: member.position,
+      position: member.profileType === "student" ? "Student" : member.position,
     })),
   });
 

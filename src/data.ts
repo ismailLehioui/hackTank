@@ -14,7 +14,7 @@ export const EVENT = {
   tagline: "Where builders pitch the sharks.",
   location: "Sousse, Tunisia",
   dates: "October 17 — 18, 2026",
-  startsAt: new Date("2026-10-03T09:00:00").toISOString(),
+  startsAt: new Date("2026-10-17T09:00:00+01:00").toISOString(),
 };
 
 export const NAV_LINKS = [

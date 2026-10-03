@@ -51,6 +51,18 @@ export type Stat = {
   label: string;
 };
 
+export type TeamMemberRegistration = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  age: string;
+  profileType: "student" | "other";
+  university: string;
+  company: string;
+  position: string;
+};
+
 export type RegistrationData = {
   firstName: string;
   lastName: string;
@@ -61,11 +73,11 @@ export type RegistrationData = {
   university: string;
   company: string;
   position: string;
-  experience: string;
   hasTeam: string;
   teamName: string;
   paymentMethod: string;
   paymentReference: string;
   paymentCommitment: boolean;
   acceptRules: boolean;
+  teamMembers: TeamMemberRegistration[];
 };

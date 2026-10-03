@@ -2,26 +2,39 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { Brand } from '../components/Brand'
-import { EXPERIENCE_LEVELS } from '../data'
 import type { RegistrationData } from '../types'
 import { isSupabaseConfigured, submitRegistration } from '../services/registrations'
 
-const STEP_LABELS = ['Participant', 'Background', 'Venture', 'Review']
+const STEP_LABELS = ['Participant', 'Team', 'Review']
 const STORAGE_KEY = 'hacktank-registration'
+
+const emptyMember: RegistrationData['teamMembers'][number] = {
+  firstName: '', lastName: '', email: '', phone: '', age: '',
+  profileType: 'student', university: '', company: '', position: '',
+}
 
 const emptyData: RegistrationData = {
   firstName: '', lastName: '', email: '', phone: '', age: '',
   profileType: 'student',
-  university: '', company: '', position: '', experience: '',
+  university: '', company: '', position: '',
   hasTeam: 'Yes, we’re a team',
   teamName: '', acceptRules: false,
   paymentMethod: '', paymentReference: '', paymentCommitment: false,
+  teamMembers: [emptyMember],
 }
 
 function loadDraft(): RegistrationData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY + '-draft')
-    if (raw) return { ...emptyData, ...JSON.parse(raw), hasTeam: 'Yes, we’re a team' }
+    if (raw) {
+      const draft = JSON.parse(raw) as Partial<RegistrationData>
+      return {
+        ...emptyData,
+        ...draft,
+        hasTeam: 'Yes, we’re a team',
+        teamMembers: (draft.teamMembers ?? emptyData.teamMembers).map((member) => ({ ...emptyMember, ...member })),
+      }
+    }
   } catch {
     // ignore corrupted drafts
   }
@@ -47,6 +60,35 @@ export function Register() {
     setErrors((prev) => ({ ...prev, [key]: '' }))
   }
 
+  const updateMember = (index: number, field: keyof RegistrationData['teamMembers'][number], value: string) => {
+    setData((prev) => {
+      const nextMembers = [...prev.teamMembers]
+      nextMembers[index] = { ...nextMembers[index], [field]: value }
+      const next = { ...prev, teamMembers: nextMembers }
+      try { localStorage.setItem(STORAGE_KEY + '-draft', JSON.stringify(next)) } catch { /* ignore */ }
+      return next
+    })
+    setErrors((prev) => ({ ...prev, [`member-${index}-${field}`]: '' }))
+  }
+
+  const addTeamMember = () => {
+    setData((prev) => {
+      const next = { ...prev, teamMembers: [...prev.teamMembers, { ...emptyMember }] }
+      try { localStorage.setItem(STORAGE_KEY + '-draft', JSON.stringify(next)) } catch { /* ignore */ }
+      return next
+    })
+  }
+
+  const removeTeamMember = (index: number) => {
+    if (data.teamMembers.length <= 1) return
+    setData((prev) => {
+      const nextMembers = prev.teamMembers.filter((_, memberIndex) => memberIndex !== index)
+      const next = { ...prev, teamMembers: nextMembers }
+      try { localStorage.setItem(STORAGE_KEY + '-draft', JSON.stringify(next)) } catch { /* ignore */ }
+      return next
+    })
+  }
+
   const validateStep = (): boolean => {
     const next: Record<string, string> = {}
     if (step === 1) {
@@ -56,8 +98,7 @@ export function Register() {
       if (!data.phone.trim()) next.phone = 'Required'
       if (!data.age || Number(data.age) < 15 || Number(data.age) > 99) next.age = 'Enter a valid age'
     }
-    if (step === 2) {
-      if (!data.experience) next.experience = 'Choose your level'
+    if (step === 1) {
       if (!data.position.trim()) next.position = 'Required'
 
       if (data.profileType === 'student') {
@@ -66,12 +107,25 @@ export function Register() {
         if (!data.company.trim()) next.company = 'Required'
       }
     }
-    if (step === 3) {
+    if (step === 2) {
       if (!data.teamName.trim()) next.teamName = 'Team name is required'
       if (!data.paymentMethod) next.paymentMethod = 'Choose a payment method'
+      if (!data.paymentReference.trim()) next.paymentReference = 'Required'
       if (!data.paymentCommitment) next.paymentCommitment = 'Please confirm your payment commitment'
+
+      data.teamMembers.forEach((member, index) => {
+        const baseKey = `member-${index}`
+        if (!member.firstName.trim()) next[`${baseKey}-firstName`] = 'Required'
+        if (!member.lastName.trim()) next[`${baseKey}-lastName`] = 'Required'
+        if (!emailPattern.test(member.email)) next[`${baseKey}-email`] = 'Enter a valid email'
+        if (!member.phone.trim()) next[`${baseKey}-phone`] = 'Required'
+        if (!member.age || Number(member.age) < 15 || Number(member.age) > 99) next[`${baseKey}-age`] = 'Enter a valid age'
+        if (member.profileType === 'student' && !member.university.trim()) next[`${baseKey}-university`] = 'Required'
+        if (member.profileType === 'other' && !member.company.trim()) next[`${baseKey}-company`] = 'Required'
+        if (!member.position.trim()) next[`${baseKey}-position`] = 'Required'
+      })
     }
-    if (step === 4) {
+    if (step === 3) {
       if (!data.acceptRules) next.acceptRules = 'Please accept to continue'
     }
     setErrors(next)
@@ -80,7 +134,7 @@ export function Register() {
 
   const goNext = async () => {
     if (!validateStep()) return
-    if (step < 4) {
+    if (step < 3) {
       setStep(step + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } else {
@@ -154,7 +208,7 @@ export function Register() {
         </aside>
 
         <form onSubmit={(e) => { e.preventDefault(); goNext() }} noValidate>
-          <div className="form-kicker">STEP 0{step} / 04</div>
+          <div className="form-kicker">STEP 0{step} / 03</div>
 
           {step === 1 && (
             <>
@@ -166,74 +220,80 @@ export function Register() {
                 <Field label="Phone number" error={errors.phone}><input value={data.phone} onChange={(e) => update('phone', e.target.value)} placeholder="+216" /></Field>
                 <Field label="Age" error={errors.age}><input type="number" value={data.age} onChange={(e) => update('age', e.target.value)} placeholder="24" /></Field>
               </div>
+              <ProfileFields
+                value={data}
+                errors={errors}
+                onChange={(field, value) => update(field, value as RegistrationData[typeof field])}
+              />
             </>
           )}
 
           {step === 2 && (
             <>
-              <h2>Tell us about<br /><span>your background.</span></h2>
-              <p className="form-hint">Choose the profile that matches you best and complete the required fields.</p>
-
-              <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-                {[
-                  { value: 'student', label: 'Student' },
-                  { value: 'other', label: 'Professional / Other' },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => update('profileType', option.value as 'student' | 'other')}
-                    style={{
-                      flex: 1,
-                      minWidth: 180,
-                      borderRadius: 14,
-                      border: data.profileType === option.value ? '1px solid rgba(115,149,255,0.7)' : '1px solid rgba(255,255,255,0.12)',
-                      background: data.profileType === option.value ? 'rgba(115,149,255,0.14)' : 'rgba(255,255,255,0.02)',
-                      color: '#f5f7ff',
-                      padding: '0.9rem 1rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="input-grid">
-                {data.profileType === 'student' ? (
-                  <Field label="School or university *" error={errors.university}><input value={data.university} onChange={(e) => update('university', e.target.value)} placeholder="e.g. University of Sousse" /></Field>
-                ) : (
-                  <Field label="Current company *" error={errors.company}><input value={data.company} onChange={(e) => update('company', e.target.value)} placeholder="e.g. Acme or freelance" /></Field>
-                )}
-
-                <Field label="Current role *" error={errors.position}><input value={data.position} onChange={(e) => update('position', e.target.value)} placeholder="e.g. Student, Developer, Founder" /></Field>
-
-                <Field label="Experience in your field *" error={errors.experience}>
-                  <select value={data.experience} onChange={(e) => update('experience', e.target.value)}>
-                    <option value="" disabled>Select your level</option>
-                    {EXPERIENCE_LEVELS.map((level) => <option key={level}>{level}</option>)}
-                  </select>
-                </Field>
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
               <h2>Team up for<br /><span>the Tank.</span></h2>
               <div className="input-grid single">
-                <Field label="Team name" error={errors.teamName}><input value={data.teamName} onChange={(e) => update('teamName', e.target.value)} placeholder="Something people remember" /></Field>
-                <Field label="Payment method" error={errors.paymentMethod}>
-                  <select value={data.paymentMethod} onChange={(e) => update('paymentMethod', e.target.value)}>
+                <Field label="Team name *" error={errors.teamName}><input value={data.teamName} onChange={(e) => update('teamName', e.target.value)} placeholder="Something people remember" /></Field>
+                <Field label="Payment method *" error={errors.paymentMethod}>
+                  <select
+                    value={data.paymentMethod}
+                    onChange={(e) => update('paymentMethod', e.target.value)}
+                    required
+                    aria-invalid={Boolean(errors.paymentMethod)}
+                  >
                     <option value="" disabled>Select a method</option>
                     <option value="Bank transfer">Bank transfer</option>
                     <option value="Organizer payment">Payment to an organizer</option>
                   </select>
                 </Field>
-                <Field label="Payment reference (optional)"><input value={data.paymentReference} onChange={(e) => update('paymentReference', e.target.value)} placeholder="Transaction or receipt reference" /></Field>
+                <Field label="Payment reference *" error={errors.paymentReference}><input value={data.paymentReference} onChange={(e) => update('paymentReference', e.target.value)} placeholder="Transaction or receipt reference" /></Field>
               </div>
+
+              <div style={{ marginTop: 24, marginBottom: 18 }}>
+                <div className="section-label" style={{ marginBottom: 8 }}>/ TEAM MEMBERS</div>
+                <p className="form-hint" style={{ margin: 0 }}>Add every teammate. Each member needs their full details before submitting.</p>
+              </div>
+
+              {data.teamMembers.map((member, index) => (
+                <div key={`member-${index}`} style={{ border: '1px solid #d6dfe8', borderRadius: 14, padding: 18, marginBottom: 16, background: '#f8fafc' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                    <strong style={{ color: '#0b1928', fontSize: 15 }}>Member {index + 1}</strong>
+                    {data.teamMembers.length > 1 && (
+                      <button type="button" onClick={() => removeTeamMember(index)} style={{ border: '1px solid #d9e1ea', borderRadius: 999, background: '#fff', color: '#33475c', padding: '0.45rem 0.8rem', cursor: 'pointer', fontWeight: 700 }}>
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="input-grid">
+                    <Field label="First name *" error={errors[`member-${index}-firstName`]}>
+                      <input value={member.firstName} onChange={(e) => updateMember(index, 'firstName', e.target.value)} placeholder="e.g. Yassine" />
+                    </Field>
+                    <Field label="Last name *" error={errors[`member-${index}-lastName`]}>
+                      <input value={member.lastName} onChange={(e) => updateMember(index, 'lastName', e.target.value)} placeholder="e.g. Ben Ali" />
+                    </Field>
+                    <Field label="Email address *" error={errors[`member-${index}-email`]}>
+                      <input type="email" value={member.email} onChange={(e) => updateMember(index, 'email', e.target.value)} placeholder="teammate@email.com" />
+                    </Field>
+                    <Field label="Phone number *" error={errors[`member-${index}-phone`]}>
+                      <input value={member.phone} onChange={(e) => updateMember(index, 'phone', e.target.value)} placeholder="+216" />
+                    </Field>
+                    <Field label="Age *" error={errors[`member-${index}-age`]}>
+                      <input type="number" value={member.age} onChange={(e) => updateMember(index, 'age', e.target.value)} placeholder="24" />
+                    </Field>
+                  </div>
+                  <ProfileFields
+                    value={member}
+                    errors={errors}
+                    errorPrefix={`member-${index}-`}
+                    onChange={(field, value) => updateMember(index, field, value)}
+                  />
+                </div>
+              ))}
+
+              <button type="button" onClick={addTeamMember} style={{ border: '1px solid #3178ca', background: '#eef5ff', color: '#0b1928', borderRadius: 999, padding: '0.8rem 1.1rem', fontWeight: 700, cursor: 'pointer', marginTop: 8 }}>
+                + Add teammate
+              </button>
+
               <label className={`inline-check ${errors.paymentCommitment ? 'has-error' : ''}`}>
                 <input type="checkbox" checked={data.paymentCommitment} onChange={(e) => update('paymentCommitment', e.target.checked)} />
                 <span>I commit to paying the participation fee before the deadline. I understand that my registration remains pending until payment is verified.</span>
@@ -242,17 +302,18 @@ export function Register() {
             </>
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <>
               <h2>One last<br /><span>look.</span></h2>
               <div className="review">
                 <ReviewRow label="Name" value={`${data.firstName} ${data.lastName}`.trim() || '—'} />
                 <ReviewRow label="Email" value={data.email || '—'} />
                 <ReviewRow label="Profile" value={data.profileType === 'student' ? 'Student' : 'Professional / Other'} />
-                <ReviewRow label="Background" value={data.profileType === 'student' ? (data.university || '—') : (data.company || '—')} />
-                <ReviewRow label="Experience" value={data.experience || '—'} />
+                <ReviewRow label={data.profileType === 'student' ? 'School or university' : 'Current company'} value={data.profileType === 'student' ? (data.university || '—') : (data.company || '—')} />
+                <ReviewRow label="Current role" value={data.position || '—'} />
                 <ReviewRow label="Team" value={data.teamName || '—'} />
                 <ReviewRow label="Payment" value={data.paymentMethod || '—'} />
+                <ReviewRow label="Teammates" value={String(data.teamMembers.length)} />
               </div>
               <label className={`inline-check ${errors.acceptRules ? 'has-error' : ''}`}>
                 <input type="checkbox" checked={data.acceptRules} onChange={(e) => update('acceptRules', e.target.checked)} />
@@ -265,11 +326,74 @@ export function Register() {
           <div className="form-actions">
             {step > 1 && <button type="button" className="back-button" onClick={() => setStep(step - 1)}>← Back</button>}
             <button className="primary" type="submit" disabled={isSubmitting}>
-              {step === 4 ? (isSubmitting ? 'Submitting...' : 'Submit application') : 'Continue'} <span>↗</span>
+              {step === 3 ? (isSubmitting ? 'Submitting...' : 'Submit application') : 'Continue'} <span>↗</span>
             </button>
           </div>
           {submitError && <p className="form-submit-error" role="alert">{submitError}</p>}
         </form>
+      </div>
+    </div>
+  )
+}
+
+type ProfileFieldKey = 'profileType' | 'university' | 'company' | 'position'
+
+function ProfileFields({
+  value,
+  errors,
+  errorPrefix = '',
+  onChange,
+}: {
+  value: Pick<RegistrationData, ProfileFieldKey>
+  errors: Record<string, string>
+  errorPrefix?: string
+  onChange: (field: ProfileFieldKey, value: string) => void
+}) {
+  const options = [
+    { value: 'student', label: 'Student' },
+    { value: 'other', label: 'Professional / Other' },
+  ] as const
+
+  return (
+    <div style={{ marginTop: 18 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }} role="group" aria-label="Profile type">
+        {options.map((option) => {
+          const selected = value.profileType === option.value
+          return (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onChange('profileType', option.value)}
+              style={{
+                border: `1px solid ${selected ? '#0b1928' : '#d6dfe8'}`,
+                borderRadius: 6,
+                background: selected ? '#0b1928' : 'transparent',
+                color: selected ? '#fff' : '#33475c',
+                padding: '7px 10px',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              {option.label}
+            </button>
+          )
+        })}
+      </div>
+      <div className="input-grid">
+        {value.profileType === 'student' ? (
+          <Field label="School or university *" error={errors[`${errorPrefix}university`]}>
+            <input value={value.university} onChange={(event) => onChange('university', event.target.value)} placeholder="e.g. University of Sousse" />
+          </Field>
+        ) : (
+          <Field label="Current company *" error={errors[`${errorPrefix}company`]}>
+            <input value={value.company} onChange={(event) => onChange('company', event.target.value)} placeholder="e.g. Acme or freelance" />
+          </Field>
+        )}
+        <Field label="Current role *" error={errors[`${errorPrefix}position`]}>
+          <input value={value.position} onChange={(event) => onChange('position', event.target.value)} placeholder="e.g. Student, Developer, Founder" />
+        </Field>
       </div>
     </div>
   )

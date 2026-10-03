@@ -2,22 +2,25 @@ import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Reveal } from '../components/Reveal'
 import { SharkCard } from '../components/SharkCard'
-import { SHARKS } from '../data'
 import { getPublicSharks } from '../services/registrations'
 import type { Shark } from '../types'
 
-
 export function Sharks() {
-  const [sharks, setSharks] = useState<Shark[]>(SHARKS)
+  const [sharks, setSharks] = useState<Shark[]>([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
     let active = true
     void getPublicSharks()
       .then((members) => {
-        if (active && members.length) setSharks(members)
+        if (active) setSharks(members)
       })
-      .catch(() => {
-        // Keep the local panel visible if Supabase is unavailable.
+      .catch((error: unknown) => {
+        if (active) setLoadError(error instanceof Error ? error.message : 'Unable to load the jury panel.')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
       })
     return () => { active = false }
   }, [])
@@ -31,8 +34,11 @@ export function Sharks() {
       </section>
 
       <section className="section shark-grid full">
-        {sharks.map((shark, index) => (
-          <Reveal key={shark.name} delay={index * 60}><SharkCard shark={shark} /></Reveal>
+        {loading && <p className="sharks-feedback" role="status">Loading the jury panel...</p>}
+        {!loading && loadError && <p className="sharks-feedback" role="alert">{loadError}</p>}
+        {!loading && !loadError && sharks.length === 0 && <p className="sharks-feedback">Jury profiles will be announced soon.</p>}
+        {!loading && !loadError && sharks.map((shark, index) => (
+          <Reveal key={`${shark.name}-${index}`} delay={index * 60}><SharkCard shark={shark} /></Reveal>
         ))}
       </section>
 

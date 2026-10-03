@@ -1,16 +1,34 @@
 import { Link } from 'react-router-dom'
 import { Mail } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Brand } from './Brand'
 import { InstagramIcon, LinkedinIcon } from './icons'
 import { EVENT, NAV_LINKS } from '../data'
+import { DEFAULT_SITE_SETTINGS, getSiteSettings, type SiteSettings } from '../services/registrations'
 
 export function Footer() {
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS)
+
+  useEffect(() => {
+    let active = true
+    void getSiteSettings()
+      .then((nextSettings) => {
+        if (active) setSettings(nextSettings)
+      })
+      .catch(() => {
+        // Retain the existing public contact details if settings cannot be fetched.
+      })
+    return () => { active = false }
+  }, [])
+
+  const phoneLink = settings.contact_phone.replace(/[^\d+]/g, '')
+
   return (
     <footer className="footer">
       <div className="footer-top">
         <div className="footer-brand">
           <Brand />
-          <p>{EVENT.tagline}<br />Powered by {EVENT.org}.</p>
+          <p>{EVENT.tagline}<br /></p>
           <div className="organizer-mark" aria-label="Organized by JCI Sousse">
             <img
               src="/jci_sousse.jpeg"
@@ -21,9 +39,9 @@ export function Footer() {
             <strong>JCI SOUSSE</strong>
           </div>
           <div className="footer-social">
-            <a href="https://www.linkedin.com/company/jci-sousse/home/" target="_blank" rel="noreferrer" aria-label="JCI Sousse on LinkedIn"><LinkedinIcon size={18} /></a>
-            <a href="https://www.instagram.com/jcisousse/" target="_blank" rel="noreferrer" aria-label="JCI Sousse on Instagram"><InstagramIcon size={18} /></a>
-            <a href="mailto:hello@hacktank.tn" aria-label="Email"><Mail size={18} /></a>
+            {settings.linkedin_url && <a href={settings.linkedin_url} target="_blank" rel="noreferrer" aria-label="JCI Sousse on LinkedIn"><LinkedinIcon size={18} /></a>}
+            {settings.instagram_url && <a href={settings.instagram_url} target="_blank" rel="noreferrer" aria-label="JCI Sousse on Instagram"><InstagramIcon size={18} /></a>}
+            {settings.contact_email && <a href={`mailto:${settings.contact_email}`} aria-label="Email"><Mail size={18} /></a>}
           </div>
         </div>
         <div className="footer-cols">
@@ -41,9 +59,9 @@ export function Footer() {
           </div>
           <div>
             <h4>Contact</h4>
-            <a href="mailto:hello@hacktank.tn">hello@hacktank.tn</a>
-            <span>+216 00 000 000</span>
-            <a href="#">JCI Sousse</a>
+            {settings.contact_email && <a href={`mailto:${settings.contact_email}`}>{settings.contact_email}</a>}
+            {settings.contact_phone && <a href={`tel:${phoneLink}`}>{settings.contact_phone}</a>}
+            {settings.linkedin_url && <a href={settings.linkedin_url} target="_blank" rel="noreferrer">JCI Sousse</a>}
           </div>
         </div>
       </div>

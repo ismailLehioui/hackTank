@@ -1,16 +1,30 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Reveal } from '../components/Reveal'
 import { SectionHeader } from '../components/SectionHeader'
 import { SharkCard } from '../components/SharkCard'
 import { CountdownClock } from '../components/CountdownClock'
 import { EVENT, HOW_IT_WORKS, IDEAS, SHARKS, STATS } from '../data'
-import { getPublicIdeas, getPublicSharks } from '../services/registrations'
+import { getPublicIdeas, getPublicSharks, getSiteSettings } from '../services/registrations'
 import type { Shark } from '../types'
 
 export function Home() {
   const [sharks, setSharks] = useState<Shark[]>(SHARKS)
   const [ideas, setIdeas] = useState(IDEAS)
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    void getSiteSettings()
+      .then((settings) => {
+        if (active) setHeroImageUrl(settings.hero_image_url)
+      })
+      .catch(() => {
+        // The bundled hero remains available if settings cannot be fetched.
+      })
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -39,7 +53,7 @@ export function Home() {
   return (
     <>
       {/* HERO */}
-      <section className="hero">
+      <section className="hero" style={{ '--hero-image': heroImageUrl ? `url("${heroImageUrl}")` : undefined } as CSSProperties}>
         <div className="grid-lines" />
         <div className="orb orb-one" />
         <div className="orb orb-two" />

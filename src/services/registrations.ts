@@ -11,7 +11,6 @@ export type ParticipantRecord = {
   school: string | null;
   company: string | null;
   position: string | null;
-  experience_level: string | null;
   has_team: boolean;
   looking_for_teammates: boolean;
   payment_status: "pending" | "verified" | "rejected";
@@ -49,6 +48,69 @@ export type PublicJuryMember = {
   linkedin_url: string | null;
 };
 
+export type SiteSettings = {
+  id: string | null;
+  contact_email: string;
+  contact_phone: string;
+  linkedin_url: string;
+  instagram_url: string;
+  hero_image_url: string | null;
+};
+
+export const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  id: null,
+  contact_email: "hello@hacktank.tn",
+  contact_phone: "+216 00 000 000",
+  linkedin_url: "https://www.linkedin.com/company/jci-sousse/home/",
+  instagram_url: "https://www.instagram.com/jcisousse/",
+  hero_image_url: null,
+};
+
+const SITE_SETTINGS_COLUMNS =
+  "id, contact_email, contact_phone, linkedin_url, instagram_url, hero_image_url";
+
+export async function getSiteSettings(): Promise<SiteSettings> {
+  if (!supabase) return DEFAULT_SITE_SETTINGS;
+  const { data, error } = await supabase
+    .from("settings")
+    .select(SITE_SETTINGS_COLUMNS)
+    .order("id", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data
+    ? ({ ...DEFAULT_SITE_SETTINGS, ...data } as SiteSettings)
+    : DEFAULT_SITE_SETTINGS;
+}
+
+export async function saveSiteSettings(
+  values: Omit<SiteSettings, "id">,
+): Promise<SiteSettings> {
+  if (!supabase) throw new Error("Supabase is not configured");
+  const current = await getSiteSettings();
+  const query = current.id
+    ? supabase.from("settings").update(values).eq("id", current.id)
+    : supabase.from("settings").insert(values);
+  const { data, error } = await query.select(SITE_SETTINGS_COLUMNS).single();
+  if (error) throw error;
+  return { ...DEFAULT_SITE_SETTINGS, ...data } as SiteSettings;
+}
+
+export async function uploadSiteHeroImage(file: File): Promise<string> {
+  if (!supabase) throw new Error("Supabase is not configured");
+  if (!file.type.startsWith("image/")) throw new Error("Choose an image file.");
+  if (file.size > 8 * 1024 * 1024)
+    throw new Error("Image must be 8 MB or smaller.");
+  const bucket = supabase.storage.from("site-assets");
+  const { error } = await bucket.upload("home/hero", file, {
+    cacheControl: "0",
+    contentType: file.type,
+    upsert: true,
+  });
+  if (error) throw error;
+  return `${bucket.getPublicUrl("home/hero").data.publicUrl}?v=${Date.now()}`;
+}
+
 export type PublicIdea = Idea & { id: string };
 
 export type TeamRecord = {
@@ -61,6 +123,7 @@ export type TeamRecord = {
     name: string;
     email: string;
     is_leader: boolean;
+    payment_status: ParticipantRecord["payment_status"];
   }>;
   project: {
     id: string;
@@ -88,10 +151,9 @@ export async function submitRegistration(data: RegistrationData) {
     p_email: data.email,
     p_phone: data.phone,
     p_age: Number(data.age),
-    p_school: data.university,
-    p_company: data.company,
+    p_school: data.profileType === "student" ? data.university : "",
+    p_company: data.profileType === "other" ? data.company : "",
     p_position: data.position,
-    p_experience: data.experience,
     p_skills: [],
     p_has_team: data.hasTeam === "Yes, we’re a team",
     p_team_name: data.teamName,
@@ -102,6 +164,16 @@ export async function submitRegistration(data: RegistrationData) {
     p_payment_method: data.paymentMethod,
     p_payment_reference: data.paymentReference,
     p_payment_commitment: data.paymentCommitment,
+    p_team_members: data.teamMembers.map((member) => ({
+      first_name: member.firstName,
+      last_name: member.lastName,
+      email: member.email,
+      phone: member.phone,
+      age: Number(member.age),
+      school: member.profileType === "student" ? member.university : "",
+      company: member.profileType === "other" ? member.company : "",
+      position: member.position,
+    })),
   });
 
   if (error) throw error;
@@ -190,6 +262,7 @@ const PUBLIC_JURY_COLORS = [
 ];
 
 export async function getPublicSharks(): Promise<Shark[]> {
+  if (!supabase) throw new Error("Supabase is not configured");
   const members = await getPublicJury();
   return members.map((member, index) => {
     const nameParts = member.full_name.trim().split(/\s+/).filter(Boolean);
@@ -290,7 +363,9 @@ export async function getTeams(): Promise<TeamRecord[]> {
       supabase
         .from("team_members")
         .select("team_id, participant_id, is_leader"),
-      supabase.from("participants").select("id, first_name, last_name, email"),
+      supabase
+        .from("participants")
+        .select("id, first_name, last_name, email, payment_status"),
       supabase
         .from("projects")
         .select(
@@ -326,6 +401,7 @@ export async function getTeams(): Promise<TeamRecord[]> {
             : "Unknown participant",
           email: participant?.email ?? "",
           is_leader: member.is_leader,
+          payment_status: participant?.payment_status ?? "pending",
         };
       }),
     project: projects.get(team.id) ?? null,
@@ -385,22 +461,124 @@ export async function updateTeam(
   return data;
 }
 
-export async function deleteTeam(id: string) {
+export async function saveTeamProject(
+  teamId: string,
+  projectId: string | null,
+  ownerParticipantId: string | null,
+  values: { project_name: string; description: string },
+) {
   if (!supabase) throw new Error("Supabase is not configured");
-  const { error } = await supabase.from("teams").delete().eq("id", id);
+  const query = projectId
+    ? supabase
+        .from("projects")
+        .update({
+          project_name: values.project_name,
+          description: values.description,
+        })
+        .eq("id", projectId)
+    : supabase.from("projects").insert({
+        team_id: teamId,
+        owner_participant_id: ownerParticipantId,
+        project_name: values.project_name,
+        description: values.description,
+      });
+  const { data, error } = await query
+    .select(
+      "id, team_id, project_name, category, description, problem_statement, solution",
+    )
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteTeam(id: string, confirmationName: string) {
+  if (!supabase) throw new Error("Supabase is not configured");
+  const { error } = await supabase.rpc("admin_delete_team_with_participants", {
+    p_team_id: id,
+    p_confirmation_name: confirmationName,
+  });
   if (error) throw error;
 }
 
-export async function addParticipantToTeam(
+export async function createTeamWithLeader(
+  teamName: string,
+  leader: NewTeamParticipant,
+) {
+  if (!supabase) throw new Error("Supabase is not configured");
+  const { data, error } = await supabase.rpc("admin_create_team_with_leader", {
+    p_team_name: teamName,
+    p_first_name: leader.first_name,
+    p_last_name: leader.last_name,
+    p_email: leader.email,
+    p_phone: leader.phone,
+    p_age: leader.age,
+    p_school: leader.school,
+    p_company: leader.company,
+    p_position: leader.position,
+    p_payment_method: leader.payment_method,
+    p_payment_reference: leader.payment_reference,
+    p_payment_commitment: leader.payment_commitment,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export type NewTeamParticipant = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  age: number;
+  school: string;
+  company: string;
+  position: string;
+  payment_method: string;
+  payment_reference: string;
+  payment_commitment: boolean;
+};
+
+export async function createParticipantForTeam(
+  teamId: string,
+  participant: NewTeamParticipant,
+) {
+  if (!supabase) throw new Error("Supabase is not configured");
+  const { data, error } = await supabase.rpc("admin_create_team_participant", {
+    p_team_id: teamId,
+    p_first_name: participant.first_name,
+    p_last_name: participant.last_name,
+    p_email: participant.email,
+    p_phone: participant.phone,
+    p_age: participant.age,
+    p_school: participant.school,
+    p_company: participant.company,
+    p_position: participant.position,
+    p_payment_method: participant.payment_method,
+    p_payment_reference: participant.payment_reference,
+    p_payment_commitment: participant.payment_commitment,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function removeParticipantFromTeam(
   teamId: string,
   participantId: string,
 ) {
   if (!supabase) throw new Error("Supabase is not configured");
-  const { error } = await supabase.from("team_members").insert({
-    team_id: teamId,
-    participant_id: participantId,
-    is_leader: false,
-  });
+  const { error } = await supabase
+    .from("team_members")
+    .delete()
+    .eq("team_id", teamId)
+    .eq("participant_id", participantId);
+  if (error) throw error;
+}
+
+export async function deleteParticipantRecord(participantId: string) {
+  if (!supabase) throw new Error("Supabase is not configured");
+  const { error } = await supabase
+    .from("participants")
+    .delete()
+    .eq("id", participantId);
   if (error) throw error;
 }
 

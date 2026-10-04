@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Download, Gavel, Image, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Pencil, Plus, RefreshCw, Save, Trash2, Users, UserPlus, UserRound, UsersRound, X } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import { createJuryMember, createParticipantForTeam, createTeamWithLeader, deleteJuryMember, deleteParticipantRecord, deleteTeam, DEFAULT_SITE_SETTINGS, getCurrentUserRole, getDashboardStats, getJuryMembers, getParticipants, getSiteSettings, getTeams, isSupabaseConfigured, removeParticipantFromTeam, saveSiteSettings, saveTeamProject, setTeamLeader, updateJuryMember, updatePaymentStatus, updateTeam, uploadSiteHeroImage, type DashboardStats, type JuryMemberRecord, type NewTeamParticipant, type ParticipantRecord, type SiteSettings, type TeamRecord } from '../services/registrations'
@@ -489,8 +489,9 @@ export function Admin() {
         <button className="admin-sidebar-toggle" type="button" aria-label={mobileSidebarOpen ? 'Close admin sidebar' : sidebarCollapsed ? 'Expand admin sidebar' : 'Collapse admin sidebar'} onClick={() => {
           if (window.matchMedia('(max-width: 900px)').matches) setMobileSidebarOpen((open) => !open)
           else setSidebarCollapsed((collapsed) => !collapsed)
-        }}>
+        }} aria-expanded={mobileSidebarOpen} aria-controls="admin-sidebar-navigation">
           {mobileSidebarOpen ? <X size={19} /> : window.matchMedia('(max-width: 900px)').matches ? <Menu size={19} /> : sidebarCollapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}
+          <span className="admin-sidebar-toggle-label">{mobileSidebarOpen ? 'Close' : 'Menu'}</span>
         </button>
         <Brand />
         <span className="form-count">ADMIN / {currentSection.label.toUpperCase()}</span>
@@ -503,13 +504,13 @@ export function Admin() {
 
       <div className={`admin-body ${mobileSidebarOpen ? 'mobile-sidebar-open' : ''}`}>
         {mobileSidebarOpen && <button className="admin-sidebar-backdrop" type="button" aria-label="Close admin navigation" onClick={() => setMobileSidebarOpen(false)} />}
-        <aside className={`admin-sidebar ${sidebarCollapsed ? 'is-collapsed' : ''} ${mobileSidebarOpen ? 'is-mobile-open' : ''}`} aria-label="Dashboard sections">
+        <aside id="admin-sidebar-navigation" className={`admin-sidebar ${sidebarCollapsed ? 'is-collapsed' : ''} ${mobileSidebarOpen ? 'is-mobile-open' : ''}`} aria-label="Dashboard sections">
           <div className="admin-sidebar-label">WORKSPACE</div>
           <nav>
             {adminSections.map(({ id, label, Icon }) => (
-              <button key={id} type="button" title={sidebarCollapsed ? label : undefined} className={requestedSection === id ? 'active' : ''} aria-current={requestedSection === id ? 'page' : undefined} onClick={() => { navigate(`/admin/${id}`); setMobileSidebarOpen(false) }}>
-                <Icon size={17} /><span>{label}</span>
-              </button>
+              <Link key={id} to={`/admin/${id}`} title={sidebarCollapsed ? label : undefined} className={requestedSection === id ? 'active' : ''} aria-current={requestedSection === id ? 'page' : undefined} onClick={() => setMobileSidebarOpen(false)}>
+                <Icon size={17} aria-hidden="true" /><span>{label}</span>
+              </Link>
             ))}
           </nav>
         </aside>

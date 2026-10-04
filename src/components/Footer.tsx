@@ -29,14 +29,9 @@ export function Footer() {
         <div className="footer-brand">
           <Brand />
           <p>{EVENT.tagline}<br /></p>
-          <div className="organizer-mark" aria-label="Organized by JCI Sousse">
-            <img
-              src="/jci_sousse.jpeg"
-              alt="JCI Sousse"
-              onError={(event) => { event.currentTarget.hidden = true }}
-            />
-            <span>ORGANIZED BY</span>
-            <strong>JCI SOUSSE</strong>
+          <div className="footer-jci-signature">
+            <img className="footer-jci-image" src="/jci_sousse-removebg-preview.png" alt="JCI Sousse" />
+            <span>POWERED BY <strong>JCI SOUSSE</strong></span>
           </div>
           <div className="footer-social">
             {settings.linkedin_url && <a href={settings.linkedin_url} target="_blank" rel="noreferrer" aria-label="JCI Sousse on LinkedIn"><LinkedinIcon size={18} /></a>}

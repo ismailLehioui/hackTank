@@ -243,10 +243,11 @@ To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12p
 .footer { background: #071019; padding: 70px 11vw 40px; }
 .footer-top { display: grid; grid-template-columns: 1.3fr 2fr; gap: 6vw; padding-bottom: 45px; border-bottom: 1px solid #1b2a3a; }
 .footer-brand p { color: #8795a7; line-height: 1.7; margin: 22px 0; font: 11px 'DM Mono', monospace; }
-.organizer-mark { display: inline-flex; flex-direction: column; gap: 5px; margin-bottom: 24px; padding-left: 12px; border-left: 2px solid var(--gold); }
-.organizer-mark img { display: block; width: 88px; max-height: 58px; object-fit: contain; object-position: left center; margin-bottom: 5px; }
-.organizer-mark span { color: #718297; font: 9px 'DM Mono', monospace; letter-spacing: 1.5px; }
-.organizer-mark strong { color: #f4f6f8; font-size: 14px; letter-spacing: 1.5px; }
+.footer-jci-signature { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+.footer-jci-image { display: block; width: 126px; height: 52px; object-fit: contain; object-position: left center; margin: 0 0 22px; padding: 4px; border-radius: 3px; background: #e9f0f4; }
+.footer-jci-signature .footer-jci-image { flex: 0 0 126px; margin: 0; }
+.footer-jci-signature > span { display: grid; gap: 4px; color: #8795a7; font: 9px 'DM Mono', monospace; letter-spacing: 1px; }
+.footer-jci-signature strong { color: #dce5ed; font-size: 11px; }
 .footer-social { display: flex; gap: 12px; }
 .footer-social a { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #22344a; color: #9fb0c2; border-radius: 50%; }
 .footer-social a:hover { background: var(--gold); color: #08111d; border-color: var(--gold); }

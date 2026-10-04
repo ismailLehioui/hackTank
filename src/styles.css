@@ -391,14 +391,32 @@ To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12p
 
 /* ADMIN */
 .admin-page { min-height: 100vh; background: #edf0f3; color: #0a1725; }
-.admin-nav { height: 84px; padding: 0 4vw; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #c8d0d8; background: #fff; position: sticky; top: 0; z-index: 10; }
+.admin-nav { height: 84px; padding: 0 4vw; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #c8d0d8; background: #fff; position: sticky; top: 0; z-index: 35; }
+.admin-sidebar-toggle { width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; border: 1px solid #d7dee5; border-radius: 6px; color: #33475c; background: #fff; }
+.admin-sidebar-toggle:hover { color: #175b95; border-color: #9dbbd5; background: #f5f9fc; }
 .admin-actions { display: flex; gap: 10px; }
 .admin-btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #c2ccd6; padding: 10px 14px; font: 12px 'DM Mono', monospace; color: #33475c; border-radius: 6px; }
 .admin-btn:hover:not(:disabled) { border-color: #3178ca; }
 .admin-btn:disabled { opacity: .45; cursor: not-allowed; }
 .admin-btn.primary-btn { background: var(--gold); border-color: var(--gold); color: #08111d; }
 .admin-btn.danger:hover:not(:disabled) { border-color: #e0533d; color: #d84a32; }
-.admin-body { padding: 45px 4vw 80px; }
+.admin-body { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 28px; align-items: start; padding: 30px 4vw 80px; transition: grid-template-columns .22s ease, gap .22s ease; }
+.admin-page.sidebar-collapsed .admin-body { grid-template-columns: 62px minmax(0, 1fr); gap: 20px; }
+.admin-sidebar { position: sticky; top: 104px; align-self: start; padding: 14px 10px; border: 1px solid #d7dee5; border-radius: 8px; background: #fff; transition: padding .2s ease; }
+.admin-sidebar-label { padding: 5px 10px 12px; color: #8492a1; font: 9px 'DM Mono', monospace; letter-spacing: 1.2px; }
+.admin-sidebar nav { display: grid; gap: 3px; }
+.admin-sidebar nav button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px; border-radius: 5px; color: #5e7083; font-size: 12px; text-align: left; transition: background .16s ease, color .16s ease; }
+.admin-sidebar nav button:hover { background: #f2f6fa; color: #173454; }
+.admin-sidebar nav button.active { background: #eaf2fa; color: #175b95; font-weight: 700; }
+.admin-sidebar nav button.active svg { color: #3178ca; }
+.admin-page.sidebar-collapsed .admin-sidebar { padding: 12px 7px; }
+.admin-page.sidebar-collapsed .admin-sidebar-label,
+.admin-page.sidebar-collapsed .admin-sidebar nav button span { display: none; }
+.admin-page.sidebar-collapsed .admin-sidebar nav button { justify-content: center; padding: 11px 8px; }
+.admin-sidebar-backdrop { display: none; }
+.admin-main-content { min-width: 0; }
+.admin-main-content > .admin-head { scroll-margin-top: 112px; }
+.admin-main-content > .admin-section { scroll-margin-top: 108px; }
 .admin-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
 .admin-head h1 { font-size: 56px; margin: 12px 0 0; }
 .admin-head h1 span { color: #3178ca; }
@@ -543,12 +561,32 @@ To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12p
 .team-upload p { margin-bottom: 0; }
 .team-success { background: #e5f5ed; border-left: 3px solid #48a47c; color: #17623f; padding: 14px 16px; font-size: 13px; }
 
-@media (max-width: 760px) {
-  .admin-nav { height: auto; min-height: 70px; padding: 15px 6vw; flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .admin-nav { height: auto; min-height: 70px; padding: 12px 5vw; flex-wrap: wrap; }
   .admin-nav .form-count { display: none; }
+  .admin-sidebar-toggle { order: 0; }
+  .admin-nav > .brand { margin-right: auto; }
   .admin-actions { width: 100%; }
+  .admin-body, .admin-page.sidebar-collapsed .admin-body { display: block; padding: 22px 5vw 60px; }
+  .admin-sidebar { position: fixed; z-index: 41; top: 0; bottom: 0; left: 0; width: min(290px, 84vw); overflow-y: auto; padding: 22px 14px; border: 0; border-right: 1px solid #d7dee5; border-radius: 0; box-shadow: 16px 0 42px rgba(10, 23, 37, .14); transform: translateX(-105%); transition: transform .22s ease; }
+  .admin-sidebar.is-mobile-open { transform: translateX(0); }
+  .admin-page.sidebar-collapsed .admin-sidebar { padding: 22px 14px; }
+  .admin-sidebar-label, .admin-page.sidebar-collapsed .admin-sidebar-label { display: block; }
+  .admin-sidebar nav, .admin-page.sidebar-collapsed .admin-sidebar nav { display: grid; width: auto; min-width: 0; gap: 4px; }
+  .admin-sidebar nav button, .admin-page.sidebar-collapsed .admin-sidebar nav button { width: 100%; justify-content: flex-start; gap: 11px; padding: 12px; white-space: normal; font-size: 13px; }
+  .admin-sidebar nav button span, .admin-page.sidebar-collapsed .admin-sidebar nav button span { display: inline; }
+  .admin-sidebar-backdrop { display: block; position: fixed; z-index: 40; inset: 0; background: rgba(4, 12, 22, .5); }
+  .admin-main-content > .admin-head, .admin-main-content > .admin-section { scroll-margin-top: 20px; }
+}
+
+@media (max-width: 760px) {
   .admin-btn { flex: 1; justify-content: center; padding: 10px 8px; font-size: 10px; }
-  .admin-body { padding: 35px 6vw 60px; }
+  .admin-body { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 20px 6vw 60px; }
+  .admin-sidebar { top: 104px; z-index: 8; margin: 0 -1vw; padding: 8px; overflow-x: auto; }
+  .admin-sidebar-label { display: none; }
+  .admin-sidebar nav { display: flex; width: max-content; min-width: 100%; gap: 4px; }
+  .admin-sidebar nav button { width: auto; flex: 0 0 auto; gap: 7px; padding: 9px 11px; white-space: nowrap; font-size: 11px; }
+  .admin-main-content > .admin-head, .admin-main-content > .admin-section { scroll-margin-top: 164px; }
   .admin-head h1 { font-size: 42px; }
   .admin-search { min-width: 100%; width: 100%; }
   .admin-stats { grid-template-columns: 1fr 1fr; }

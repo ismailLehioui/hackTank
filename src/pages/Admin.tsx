@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Download, LogOut, Pencil, Plus, RefreshCw, Save, Trash2, Users, UserPlus, X } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Download, Gavel, Image, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Pencil, Plus, RefreshCw, Save, Trash2, Users, UserPlus, UserRound, UsersRound, X } from 'lucide-react'
 import { Brand } from '../components/Brand'
 import { createJuryMember, createParticipantForTeam, createTeamWithLeader, deleteJuryMember, deleteParticipantRecord, deleteTeam, DEFAULT_SITE_SETTINGS, getCurrentUserRole, getDashboardStats, getJuryMembers, getParticipants, getSiteSettings, getTeams, isSupabaseConfigured, removeParticipantFromTeam, saveSiteSettings, saveTeamProject, setTeamLeader, updateJuryMember, updatePaymentStatus, updateTeam, uploadSiteHeroImage, type DashboardStats, type JuryMemberRecord, type NewTeamParticipant, type ParticipantRecord, type SiteSettings, type TeamRecord } from '../services/registrations'
 import { supabase } from '../services/supabase'
@@ -15,6 +15,10 @@ function toCsvCell(value: unknown): string {
 
 export function Admin() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const requestedSection = location.pathname.split('/')[2] || 'overview'
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -104,6 +108,13 @@ export function Admin() {
   useEffect(() => {
     if (authenticated) void loadDashboard()
   }, [authenticated])
+
+  useEffect(() => {
+    const validSections = ['overview', 'site-content', 'jury', 'teams', 'participants']
+    if (authenticated && !validSections.includes(requestedSection)) {
+      navigate('/admin/overview', { replace: true })
+    }
+  }, [authenticated, navigate, requestedSection])
 
   useEffect(() => () => {
     if (heroImagePreview?.startsWith('blob:')) URL.revokeObjectURL(heroImagePreview)
@@ -463,11 +474,26 @@ export function Admin() {
     ['Jury', stats.jury, 'Sharks on the panel'], ['Sponsors', stats.sponsors, 'Supporting partners'],
   ]
 
+  const adminSections = [
+    { id: 'overview', label: 'Overview', Icon: LayoutDashboard },
+    { id: 'site-content', label: 'Site content', Icon: Image },
+    { id: 'jury', label: 'Jury', Icon: Gavel },
+    { id: 'teams', label: 'Teams', Icon: UsersRound },
+    { id: 'participants', label: 'Participants', Icon: UserRound },
+  ]
+  const currentSection = adminSections.find((section) => section.id === requestedSection) ?? adminSections[0]
+
   return (
-    <div className="admin-page">
+    <div className={`admin-page ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <header className="admin-nav">
+        <button className="admin-sidebar-toggle" type="button" aria-label={mobileSidebarOpen ? 'Close admin sidebar' : sidebarCollapsed ? 'Expand admin sidebar' : 'Collapse admin sidebar'} onClick={() => {
+          if (window.matchMedia('(max-width: 900px)').matches) setMobileSidebarOpen((open) => !open)
+          else setSidebarCollapsed((collapsed) => !collapsed)
+        }}>
+          {mobileSidebarOpen ? <X size={19} /> : window.matchMedia('(max-width: 900px)').matches ? <Menu size={19} /> : sidebarCollapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}
+        </button>
         <Brand />
-        <span className="form-count">ADMIN / DASHBOARD</span>
+        <span className="form-count">ADMIN / {currentSection.label.toUpperCase()}</span>
         <div className="admin-actions">
           <button onClick={() => void loadDashboard()} className="admin-btn" disabled={loading}><RefreshCw size={15} /> Refresh</button>
           <button onClick={exportCsv} className="admin-btn primary-btn" disabled={!records.length}><Download size={15} /> Export CSV</button>
@@ -475,34 +501,46 @@ export function Admin() {
         </div>
       </header>
 
-      <div className="admin-body">
+      <div className={`admin-body ${mobileSidebarOpen ? 'mobile-sidebar-open' : ''}`}>
+        {mobileSidebarOpen && <button className="admin-sidebar-backdrop" type="button" aria-label="Close admin navigation" onClick={() => setMobileSidebarOpen(false)} />}
+        <aside className={`admin-sidebar ${sidebarCollapsed ? 'is-collapsed' : ''} ${mobileSidebarOpen ? 'is-mobile-open' : ''}`} aria-label="Dashboard sections">
+          <div className="admin-sidebar-label">WORKSPACE</div>
+          <nav>
+            {adminSections.map(({ id, label, Icon }) => (
+              <button key={id} type="button" title={sidebarCollapsed ? label : undefined} className={requestedSection === id ? 'active' : ''} aria-current={requestedSection === id ? 'page' : undefined} onClick={() => { navigate(`/admin/${id}`); setMobileSidebarOpen(false) }}>
+                <Icon size={17} /><span>{label}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
+        <main className="admin-main-content">
         <div className="admin-head">
           <div>
             <div className="section-label">/ EVENT CONTROL ROOM</div>
-            <h1>Hack Tank <span>dashboard.</span></h1>
+            <h1>{requestedSection === 'overview' ? <>Hack Tank <span>dashboard.</span></> : <>{currentSection.label}<span>.</span></>}</h1>
           </div>
           <div className="admin-status"><Users size={16} /> {loading ? 'Syncing data...' : 'Live Supabase data'}</div>
         </div>
 
         {dataError && <p className="admin-alert" role="alert">{dataError}</p>}
 
-        <section className="admin-stats">
+        {requestedSection === 'overview' && <section className="admin-stats">
           {cards.map(([label, value, detail]) => (
             <div className="admin-stat-card" key={String(label)}>
               <span>{label}</span><strong>{value}</strong><small>{detail}</small>
             </div>
           ))}
-        </section>
+        </section>}
 
-        <section className="admin-section admin-site-content">
+        {requestedSection === 'site-content' && <section className="admin-section admin-site-content">
           <div className="admin-section-head">
             <div><h2>Site content</h2><p>Manage the public footer contacts and the home page image.</p><button className="admin-btn primary-btn admin-add-team" type="button" onClick={() => setSiteContentModalOpen(true)}><Pencil size={15} /> Edit site content</button></div>
           </div>
           {siteSettingsError && <p className="admin-alert" role="alert">{siteSettingsError}</p>}
           {siteSettingsMessage && <p className="admin-settings-success" role="status">{siteSettingsMessage}</p>}
-        </section>
+        </section>}
 
-        {siteContentModalOpen && <div className="admin-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !siteSettingsBusy) setSiteContentModalOpen(false) }}>
+        {requestedSection === 'site-content' && siteContentModalOpen && <div className="admin-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !siteSettingsBusy) setSiteContentModalOpen(false) }}>
           <section className="admin-participant-modal admin-site-modal" role="dialog" aria-modal="true" aria-labelledby="site-content-title">
             <div className="admin-modal-head"><div><div className="section-label">/ SITE CONTENT</div><h2 id="site-content-title">Edit site content</h2><p>Update the public footer contacts and home image.</p></div><button className="admin-icon-btn" type="button" title="Close" disabled={siteSettingsBusy} onClick={() => setSiteContentModalOpen(false)}><X size={18} /></button></div>
             <form className="admin-site-form" onSubmit={saveSiteContent}>
@@ -531,7 +569,7 @@ export function Admin() {
           </section>
         </div>}
 
-        <section className="admin-section">
+        {requestedSection === 'jury' && <section className="admin-section" id="admin-jury">
           <div className="admin-section-head">
             <div><h2>Jury management</h2><p>Create, edit or remove jury profiles. Account passwords remain managed by Supabase Auth.</p><button className="admin-btn primary-btn admin-add-team" type="button" onClick={() => { setEditingJuryId(null); setJuryDraft({ full_name: '', company: '', position: '' }); setJuryModalOpen(true) }}><Plus size={15} /> Add jury</button></div>
             <input className="admin-search" placeholder="Search jury..." value={juryQuery} onChange={(event) => setJuryQuery(event.target.value)} />
@@ -548,9 +586,9 @@ export function Admin() {
             </table>
             {!filteredJury.length && <p className="admin-note">No jury members found.</p>}
           </div>
-        </section>
+        </section>}
 
-        <section className="admin-section">
+        {requestedSection === 'teams' && <section className="admin-section" id="admin-teams">
           <div className="admin-section-head">
             <div><h2>Teams</h2><p>Manage teams, their members, and one project per team.</p><button className="admin-btn primary-btn admin-add-team" type="button" onClick={() => setNewTeamOpen(true)}><Plus size={15} /> Add team</button></div>
             <input className="admin-search" placeholder="Search team, member or project..." value={teamQuery} onChange={(event) => setTeamQuery(event.target.value)} />
@@ -570,9 +608,9 @@ export function Admin() {
             </table>
             {!filteredTeams.length && <p className="admin-note">No teams found.</p>}
           </div>
-        </section>
+        </section>}
 
-        <section className="admin-section">
+        {requestedSection === 'participants' && <section className="admin-section" id="admin-participants">
           <div className="admin-section-head">
             <div><h2>Participants</h2><p>All applications submitted through the public registration form.</p></div>
             <input className="admin-search" placeholder="Search name, email, school, skill..." value={query} onChange={(event) => setQuery(event.target.value)} />
@@ -600,7 +638,8 @@ export function Admin() {
             </table>
             {!loading && !filtered.length && <p className="admin-note">No participants found.</p>}
           </div>
-        </section>
+        </section>}
+        </main>
       </div>
       {paymentValidationTarget && <div className="admin-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !loading) setPaymentValidationTarget(null) }}>
         <section className="admin-participant-modal admin-delete-choice" role="dialog" aria-modal="true" aria-labelledby="payment-validation-title">

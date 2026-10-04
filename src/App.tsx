@@ -13,7 +13,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/register" element={<Register />} />
-      <Route path="/admin" element={<Admin />} />
+      <Route path="/admin/*" element={<Admin />} />
       <Route path="/jury" element={<Jury />} />
       <Route path="/team" element={<Team />} />
       <Route element={<Layout />}>

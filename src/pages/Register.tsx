@@ -101,6 +101,7 @@ export function Register() {
     if (step === 1) {
       if (data.profileType === 'student') {
         if (!data.university.trim()) next.university = 'Required'
+        if (!data.position.trim()) next.position = 'Required'
       } else {
         if (!data.company.trim()) next.company = 'Required'
         if (!data.position.trim()) next.position = 'Required'
@@ -119,8 +120,10 @@ export function Register() {
         if (!emailPattern.test(member.email)) next[`${baseKey}-email`] = 'Enter a valid email'
         if (!member.phone.trim()) next[`${baseKey}-phone`] = 'Required'
         if (!member.age || Number(member.age) < 15 || Number(member.age) > 99) next[`${baseKey}-age`] = 'Enter a valid age'
-        if (member.profileType === 'student' && !member.university.trim()) next[`${baseKey}-university`] = 'Required'
-        if (member.profileType === 'other') {
+        if (member.profileType === 'student') {
+          if (!member.university.trim()) next[`${baseKey}-university`] = 'Required'
+          if (!member.position.trim()) next[`${baseKey}-position`] = 'Required'
+        } else {
           if (!member.company.trim()) next[`${baseKey}-company`] = 'Required'
           if (!member.position.trim()) next[`${baseKey}-position`] = 'Required'
         }
@@ -311,7 +314,7 @@ export function Register() {
                 <ReviewRow label="Email" value={data.email || '—'} />
                 <ReviewRow label="Profile" value={data.profileType === 'student' ? 'Student' : 'Professional / Other'} />
                 <ReviewRow label={data.profileType === 'student' ? 'School or university' : 'Current company'} value={data.profileType === 'student' ? (data.university || '—') : (data.company || '—')} />
-                {data.profileType === 'other' && <ReviewRow label="Current role" value={data.position || '—'} />}
+                <ReviewRow label={data.profileType === 'student' ? 'Specialty' : 'Current role'} value={data.position || '—'} />
                 <ReviewRow label="Team" value={data.teamName || '—'} />
                 <ReviewRow label="Payment" value={data.paymentMethod || '—'} />
                 <ReviewRow label="Teammates" value={String(data.teamMembers.length)} />
@@ -365,7 +368,10 @@ function ProfileFields({
               key={option.value}
               type="button"
               aria-pressed={selected}
-              onClick={() => onChange('profileType', option.value)}
+              onClick={() => {
+                if (option.value === 'student') onChange('position', '')
+                onChange('profileType', option.value)
+              }}
               style={{
                 border: `1px solid ${selected ? '#0b1928' : '#d6dfe8'}`,
                 borderRadius: 6,
@@ -384,9 +390,14 @@ function ProfileFields({
       </div>
       <div className="input-grid">
         {value.profileType === 'student' ? (
-          <Field label="School or university *" error={errors[`${errorPrefix}university`]}>
-            <input value={value.university} onChange={(event) => onChange('university', event.target.value)} placeholder="e.g. University of Sousse" />
-          </Field>
+          <>
+            <Field label="School or university *" error={errors[`${errorPrefix}university`]}>
+              <input value={value.university} onChange={(event) => onChange('university', event.target.value)} placeholder="e.g. University of Sousse" />
+            </Field>
+            <Field label="Specialty *" error={errors[`${errorPrefix}position`]}>
+              <input value={value.position} onChange={(event) => onChange('position', event.target.value)} placeholder="e.g. Computer Science" />
+            </Field>
+          </>
         ) : (
           <Field label="Current company *" error={errors[`${errorPrefix}company`]}>
             <input value={value.company} onChange={(event) => onChange('company', event.target.value)} placeholder="e.g. Acme or freelance" />

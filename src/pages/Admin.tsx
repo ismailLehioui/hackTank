@@ -124,7 +124,7 @@ export function Admin() {
     const normalized = query.trim().toLowerCase()
     if (!normalized) return records
     return records.filter((record) =>
-      [record.first_name, record.last_name, record.email, record.school]
+      [record.first_name, record.last_name, record.email, record.phone, record.age, record.school, record.company, record.position]
         .join(' ')
         .toLowerCase()
         .includes(normalized),
@@ -614,17 +614,19 @@ export function Admin() {
         {requestedSection === 'participants' && <section className="admin-section" id="admin-participants">
           <div className="admin-section-head">
             <div><h2>Participants</h2><p>All applications submitted through the public registration form.</p></div>
-            <input className="admin-search" placeholder="Search name, email, school, skill..." value={query} onChange={(event) => setQuery(event.target.value)} />
+            <input className="admin-search" placeholder="Search name, email, phone, school, company..." value={query} onChange={(event) => setQuery(event.target.value)} />
           </div>
           <div className="admin-table-wrap">
             <table className="admin-table">
-              <thead><tr><th>#</th><th>Name</th><th>Email</th><th>School</th><th>Team</th><th>Payment</th><th>Submitted</th></tr></thead>
+              <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Age</th><th>School / Company</th><th>Specialty / Role</th><th>Payment</th><th>Submitted</th></tr></thead>
               <tbody>
                 {filtered.map((record, index) => (
                   <tr key={record.id}>
                     <td>{index + 1}</td><td className={record.payment_status === 'verified' ? '' : 'admin-unpaid-name'}>{record.first_name} {record.last_name}</td><td>{record.email}</td>
-                    <td>{record.school || '—'}</td>
-                    <td>{record.has_team ? 'Yes' : '—'}</td>
+                    <td>{record.phone || '—'}</td>
+                    <td>{record.age || '—'}</td>
+                    <td>{record.school || record.company || '—'}</td>
+                    <td>{record.position || '—'}</td>
                     <td>
                       <strong className={record.payment_status === 'verified' ? 'admin-payment-paid' : 'admin-payment-unpaid'}>{record.payment_status === 'verified' ? 'Paid' : record.payment_status === 'rejected' ? 'Rejected' : 'To validate'}</strong>
                       <small className="admin-cell-subtitle">{record.payment_method || '—'}{record.payment_reference ? ` · ${record.payment_reference}` : ''}</small>

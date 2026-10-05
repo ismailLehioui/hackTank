@@ -11,7 +11,7 @@ export function Navbar() {
     <header className="nav">
       <div className="nav-brand-group">
         <Link to="/" className="nav-jci-logo" aria-label="JCI Sousse home" onClick={() => setOpen(false)}>
-          <img src="/jci_sousse-removebg-preview.png" alt="JCI Sousse" />
+          <img src="/jci_sousse.png" alt="JCI Sousse" />
         </Link>
         <Brand onClick={() => setOpen(false)} />
       </div>

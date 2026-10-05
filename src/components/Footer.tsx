@@ -30,7 +30,7 @@ export function Footer() {
           <Brand />
           <p>{EVENT.tagline}<br /></p>
           <div className="footer-jci-signature">
-            <img className="footer-jci-image" src="/jci_sousse-removebg-preview.png" alt="JCI Sousse" />
+            <img className="footer-jci-image" src="/jci_sousse.png" alt="JCI Sousse" />
             <span>POWERED BY <strong>JCI SOUSSE</strong></span>
           </div>
           <div className="footer-social">

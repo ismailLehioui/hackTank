@@ -44,9 +44,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 .nav-links a.active { color: #fff; }
 .nav-links a.active::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 100%; height: 2px; background: var(--gold); }
 .nav-actions { justify-self: end; display: flex; align-items: center; gap: 14px; }
-.nav-jci-logo { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 38px; flex: 0 0 68px; padding: 4px 6px; overflow: hidden; border: 1px solid rgba(210, 221, 233, .82); border-radius: 4px; background: #f8fafc; transition: background-color .2s ease, border-color .2s ease; }
-.nav-jci-logo::after { content: ''; position: absolute; top: 8px; right: -7px; height: 20px; border-right: 1px solid rgba(211, 222, 234, .42); }
-.nav-jci-logo:hover { border-color: #fff; background: #fff; }
+.nav-jci-logo { display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 38px; flex: 0 0 68px; overflow: hidden; }
+/* .nav-jci-logo { display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 38px; flex: 0 0 68px; overflow: hidden; } */
+.nav-jci-logo:hover { opacity: .82; }
 .nav-jci-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .nav-cta, .primary { background: var(--gold); color: #07111e; padding: 14px 19px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; }
 .nav-cta span, .primary span { margin-left: 18px; font-size: 15px; }
@@ -239,14 +239,28 @@ To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12p
 .cta-band .primary { background: #08111d; color: #fff; }
 .cta-band .primary span { color: var(--blue); }
 
+.verification-modal-backdrop { position: fixed; inset: 0; background: rgba(8,17,29,.6); display: grid; place-items: center; z-index: 120; padding: 20px; }
+.verification-modal { width: min(100%, 480px); background: #fff; border: 1px solid #d8e1eb; border-radius: 20px; padding: 28px 24px; box-shadow: 0 30px 80px rgba(7,17,29,.32); }
+.verification-modal h3 { margin: 18px 0 10px; font-size: clamp(28px, 4vw, 38px); line-height: 1; letter-spacing: -2px; }
+.verification-modal p { margin: 0 0 16px; color: #55657a; line-height: 1.6; }
+.verification-modal strong { color: #0b1928; }
+.verification-modal input { width: 100%; border: 1px solid #c9d6e3; border-radius: 12px; padding: 15px 16px; font: 22px 'DM Mono', monospace; letter-spacing: 8px; text-align: center; color: #0b1928; background: #f7fafc; margin: 10px 0 18px; }
+.verification-modal input:focus { outline: 2px solid rgba(49,120,202,.2); border-color: var(--blue); }
+.verification-message { color: #0b1928; font-size: 12px; font-weight: 600; margin-top: 8px; }
+.demo-verification-note { color: #3178ca; font-weight: 700; }
+.verification-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+.verification-actions .primary { min-width: 160px; justify-content: center; }
+.verification-modal .text-link { margin-top: 18px; border: 0; background: transparent; padding: 0; color: var(--blue); font: 11px 'DM Mono', monospace; cursor: pointer; }
+.verification-modal .text-link:disabled { opacity: .5; cursor: not-allowed; }
+
 /* FOOTER */
 .footer { background: #071019; padding: 70px 11vw 40px; }
 .footer-top { display: grid; grid-template-columns: 1.3fr 2fr; gap: 6vw; padding-bottom: 45px; border-bottom: 1px solid #1b2a3a; }
 .footer-brand p { color: #8795a7; line-height: 1.7; margin: 22px 0; font: 11px 'DM Mono', monospace; }
-.footer-jci-signature { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
-.footer-jci-image { display: block; width: 126px; height: 52px; object-fit: contain; object-position: left center; margin: 0 0 22px; padding: 4px; border-radius: 3px; background: #e9f0f4; }
-.footer-jci-signature .footer-jci-image { flex: 0 0 126px; margin: 0; }
-.footer-jci-signature > span { display: grid; gap: 4px; color: #8795a7; font: 9px 'DM Mono', monospace; letter-spacing: 1px; }
+.footer-jci-signature { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 22px; }
+.footer-jci-image { display: block; width: 126px; height: 52px; object-fit: contain; object-position: left center; margin: 0; padding: 0; border-radius: 0; background: transparent; }
+.footer-jci-signature .footer-jci-image { flex: 0 0 auto; margin: 0; }
+.footer-jci-signature > span { display: grid; gap: 2px; color: #8795a7; font: 9px 'DM Mono', monospace; letter-spacing: 1px; }
 .footer-jci-signature strong { color: #dce5ed; font-size: 11px; }
 .footer-social { display: flex; gap: 12px; }
 .footer-social a { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #22344a; color: #9fb0c2; border-radius: 50%; }

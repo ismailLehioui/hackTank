@@ -72,7 +72,7 @@ export function Home() {
           {/* <span>01</span> */}
           <div>
             {EVENT.dates}<br />
-            <b>{EVENT.location}<br />L'Orien Palace Hotel</b>
+            <b>{EVENT.location}<br />L'Orient Palace Hotel</b>
             {/* <small>{EVENT.dates}<br /></small> */}
             
           </div>

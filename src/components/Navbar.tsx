@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { Brand } from './Brand'
+import { InstagramIcon } from './icons'
 import { NAV_LINKS } from '../data'
 
 export function Navbar() {
@@ -31,8 +32,14 @@ export function Navbar() {
           Enter the Tank 
           {/* <span>↗</span> */}
         </Link>
+        <a className="nav-social mobile-only" href="https://www.instagram.com/hack_tank/" target="_blank" rel="noreferrer">
+          <InstagramIcon size={17} /> Follow the Tank
+        </a>
       </nav>
       <div className="nav-actions">
+        <a className="nav-social desktop-only" href="https://www.instagram.com/hack_tank/" target="_blank" rel="noreferrer">
+          <InstagramIcon size={17} /> Follow the Tank
+        </a>
         <Link to="/register" className="nav-cta desktop-only">Enter the Tank</Link>
         <button className="nav-toggle" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
           {open ? <X size={22} /> : <Menu size={22} />}

@@ -1,3 +1,5 @@
+import nodemailer from 'nodemailer'
+
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
     return response.status(405).json({ error: 'Method not allowed.' })
@@ -6,68 +8,53 @@ export default async function handler(request, response) {
   try {
     const { email, code } = request.body || {}
 
-    if (!email || !code) {
-      return response.status(400).json({ error: 'Missing email or code.' })
+    if (
+      typeof email !== 'string' ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+      typeof code !== 'string' ||
+      !/^\d{6}$/.test(code)
+    ) {
+      return response.status(400).json({ error: 'Invalid email or verification code.' })
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY
-    const resendFrom =
-      process.env.RESEND_FROM_EMAIL || 'Hack Tank <onboarding@resend.dev>'
+    const { SMTP_USER, SMTP_APP_PASSWORD } = process.env
 
-    if (!resendApiKey) {
-      return response.status(400).json({
-        error:
-          'Email verification is not configured. Add RESEND_API_KEY and RESEND_FROM_EMAIL to your environment variables.',
-      })
-    }
-
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: resendFrom,
-        to: [email],
-        subject: 'Your Hack Tank verification code',
-        html: `
-          <div style="font-family: Arial, sans-serif; color: #0b1928; line-height: 1.6;">
-            <p>Hello,</p>
-            <p>Here is your Hack Tank verification code:</p>
-
-            <p style="
-              font-size: 28px;
-              font-weight: 700;
-              letter-spacing: 4px;
-              margin: 16px 0;
-              color: #0b1928;
-            ">
-              ${code}
-            </p>
-
-            <p>This code is valid for a few minutes.</p>
-          </div>
-        `,
-      }),
-    })
-
-    if (!emailResponse.ok) {
-      const text = await emailResponse.text()
-
+    if (!SMTP_USER || !SMTP_APP_PASSWORD) {
       return response.status(500).json({
-        error: 'Failed to send verification email.',
-        details: text,
+        error: 'Email service is not configured. Set SMTP_USER and SMTP_APP_PASSWORD.',
       })
     }
 
-    return response.status(200).json({
-      ok: true,
-      demo: false,
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_APP_PASSWORD,
+      },
     })
+
+    await transporter.sendMail({
+      from: `Hack Tank <${SMTP_USER}>`,
+      to: email,
+      subject: 'Your Hack Tank verification code',
+      text: `Your Hack Tank verification code is: ${code}. It is valid for a few minutes.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #0b1928; line-height: 1.6;">
+          <p>Hello,</p>
+          <p>Here is your Hack Tank verification code:</p>
+          <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px;">${code}</p>
+          <p>This code is valid for a few minutes.</p>
+        </div>
+      `,
+    })
+
+    return response.status(200).json({ ok: true })
   } catch (error) {
+    console.error('Verification email failed:', error)
     return response.status(500).json({
-      error: error instanceof Error ? error.message : 'Unexpected error',
+      error: 'Failed to send verification email.',
     })
   }
 }

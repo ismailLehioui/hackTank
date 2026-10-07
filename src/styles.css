@@ -241,20 +241,6 @@ To prevent future pauses, consider upgrading to Pro.teY(-2px); box-shadow: 0 12p
 .cta-band .primary { background: #08111d; color: #fff; }
 .cta-band .primary span { color: var(--blue); }
 
-.verification-modal-backdrop { position: fixed; inset: 0; background: rgba(8,17,29,.6); display: grid; place-items: center; z-index: 120; padding: 20px; }
-.verification-modal { width: min(100%, 480px); background: #fff; border: 1px solid #d8e1eb; border-radius: 20px; padding: 28px 24px; box-shadow: 0 30px 80px rgba(7,17,29,.32); }
-.verification-modal h3 { margin: 18px 0 10px; font-size: clamp(28px, 4vw, 38px); line-height: 1; letter-spacing: -2px; }
-.verification-modal p { margin: 0 0 16px; color: #55657a; line-height: 1.6; }
-.verification-modal strong { color: #0b1928; }
-.verification-modal input { width: 100%; border: 1px solid #c9d6e3; border-radius: 12px; padding: 15px 16px; font: 22px 'DM Mono', monospace; letter-spacing: 8px; text-align: center; color: #0b1928; background: #f7fafc; margin: 10px 0 18px; }
-.verification-modal input:focus { outline: 2px solid rgba(49,120,202,.2); border-color: var(--blue); }
-.verification-message { color: #0b1928; font-size: 12px; font-weight: 600; margin-top: 8px; }
-.demo-verification-note { color: #3178ca; font-weight: 700; }
-.verification-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
-.verification-actions .primary { min-width: 160px; justify-content: center; }
-.verification-modal .text-link { margin-top: 18px; border: 0; background: transparent; padding: 0; color: var(--blue); font: 11px 'DM Mono', monospace; cursor: pointer; }
-.verification-modal .text-link:disabled { opacity: .5; cursor: not-allowed; }
-
 /* FOOTER */
 .footer { background: #071019; padding: 70px 11vw 40px; }
 .footer-top { display: grid; grid-template-columns: 1.3fr 2fr; gap: 6vw; padding-bottom: 45px; border-bottom: 1px solid #1b2a3a; }

@@ -48,17 +48,8 @@ export function Register() {
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [paymentEmailError, setPaymentEmailError] = useState('')
   const [data, setData] = useState<RegistrationData>(loadDraft)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [verificationCode, setVerificationCode] = useState('')
-  const [verificationInput, setVerificationInput] = useState('')
-  const [emailVerified, setEmailVerified] = useState(false)
-  const [verificationModalOpen, setVerificationModalOpen] = useState(false)
-  const [isSendingCode, setIsSendingCode] = useState(false)
-  const [isCheckingCode, setIsCheckingCode] = useState(false)
-  const [verificationMessage, setVerificationMessage] = useState('')
-  const [isDemoVerification, setIsDemoVerification] = useState(false)
 
   const update = <K extends keyof RegistrationData>(key: K, value: RegistrationData[K]) => {
     setData((prev) => {
@@ -78,71 +69,6 @@ export function Register() {
       return next
     })
     setErrors((prev) => ({ ...prev, [`member-${index}-${field}`]: '' }))
-  }
-
-  const requestEmailVerification = async () => {
-    if (!emailPattern.test(data.email)) {
-      setErrors((prev) => ({ ...prev, email: 'Enter a valid email' }))
-      return
-    }
-
-    const code = String(Math.floor(100000 + Math.random() * 900000))
-    setIsSendingCode(true)
-    setVerificationMessage('')
-    setVerificationCode('')
-    setIsDemoVerification(false)
-
-    try {
-      const response = await fetch('/api/send-verification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: data.email, code }),
-      })
-
-      const payload = await response.json().catch(() => ({}))
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Unable to send verification code.')
-      }
-
-      setVerificationCode(code)
-      setVerificationInput('')
-      setVerificationMessage('A 6-digit code was sent to your email.')
-      setEmailVerified(false)
-      setVerificationModalOpen(true)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to send verification code.'
-      setVerificationInput('')
-      setVerificationCode('')
-      setVerificationMessage(message)
-      setEmailVerified(false)
-      setVerificationModalOpen(true)
-    } finally {
-      setIsSendingCode(false)
-    }
-  }
-
-  const verifyEmailCode = async () => {
-    if (!verificationInput.trim()) {
-      setVerificationMessage('Enter the 6-digit code.')
-      return
-    }
-
-    if (verificationInput.trim() !== verificationCode) {
-      setVerificationMessage('The code you entered is incorrect.')
-      return
-    }
-
-    setIsCheckingCode(true)
-    setTimeout(() => {
-      setEmailVerified(true)
-      setVerificationModalOpen(false)
-      setVerificationInput('')
-      setVerificationMessage('')
-      setStep(2)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-      setIsCheckingCode(false)
-    }, 250)
   }
 
   const addTeamMember = () => {
@@ -212,13 +138,6 @@ export function Register() {
   const goNext = async () => {
     if (!validateStep()) return
 
-    if (step === 1) {
-      if (!emailVerified) {
-        await requestEmailVerification()
-        return
-      }
-    }
-
     if (step < 3) {
       setStep(step + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -234,27 +153,8 @@ export function Register() {
     }
     setIsSubmitting(true)
     setSubmitError('')
-    setPaymentEmailError('')
     try {
       await submitRegistration(data)
-
-      try {
-        const response = await fetch('/api/send-payment-instructions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            paymentMethod: data.paymentMethod,
-            recipients: [data.email, ...data.teamMembers.map((member) => member.email)],
-          }),
-        })
-        const payload = await response.json().catch(() => ({}))
-        if (!response.ok) {
-          throw new Error(payload?.error || 'Unable to send payment instructions.')
-        }
-      } catch {
-        setPaymentEmailError('Your registration was saved, but we could not email the payment instructions. Please contact the organizers.')
-      }
-
       localStorage.removeItem(STORAGE_KEY + '-draft')
       setSubmitted(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -274,8 +174,7 @@ export function Register() {
           <div className="success-mark"><Check size={34} /></div>
           <div className="section-label">/ YOU’RE IN THE TANK</div>
           <h1>Now go build<br /><em>something bold.</em></h1>
-          <p>Your application is received, {data.firstName || 'builder'}. It will remain pending until your payment is verified. Payment instructions were sent to the email addresses provided.</p>
-          {paymentEmailError && <p className="form-submit-error" role="alert">{paymentEmailError}</p>}
+          <p>Your application is received, {data.firstName || 'builder'}. It will remain pending until your payment is verified. The organizers will contact you with the next steps.</p>
           <div className="success-actions">
             <Link className="primary" to="/">Back to home <span>↗</span></Link>
           </div>
@@ -321,14 +220,7 @@ export function Register() {
               <div className="input-grid">
                 <Field label="First name" error={errors.firstName}><input value={data.firstName} onChange={(e) => update('firstName', e.target.value)} placeholder="e.g. Amina" /></Field>
                 <Field label="Last name" error={errors.lastName}><input value={data.lastName} onChange={(e) => update('lastName', e.target.value)} placeholder="e.g. Ben Ali" /></Field>
-                <Field label="Email address" error={errors.email}><input type="email" value={data.email} onChange={(e) => {
-                  update('email', e.target.value)
-                  if (emailVerified) {
-                    setEmailVerified(false)
-                    setVerificationCode('')
-                    setVerificationInput('')
-                  }
-                }} placeholder="you@email.com" /></Field>
+                <Field label="Email address" error={errors.email}><input type="email" value={data.email} onChange={(e) => update('email', e.target.value)} placeholder="you@email.com" /></Field>
                 <Field label="Phone number" error={errors.phone}><input value={data.phone} onChange={(e) => update('phone', e.target.value)} placeholder="+216" /></Field>
                 <Field label="Age" error={errors.age}><input type="number" value={data.age} onChange={(e) => update('age', e.target.value)} placeholder="24" /></Field>
               </div>
@@ -436,43 +328,14 @@ export function Register() {
 
           <div className="form-actions">
             {step > 1 && <button type="button" className="back-button" onClick={() => setStep(step - 1)}>← Back</button>}
-            <button className="primary" type="submit" disabled={isSubmitting || isSendingCode || isCheckingCode}>
-              {step === 3 ? (isSubmitting ? 'Submitting...' : 'Submit application') : (isSendingCode ? 'Sending code...' : 'Continue')} <span>↗</span>
+            <button className="primary" type="submit" disabled={isSubmitting}>
+              {step === 3 ? (isSubmitting ? 'Submitting...' : 'Submit application') : 'Continue'} <span>↗</span>
             </button>
           </div>
           {submitError && <p className="form-submit-error" role="alert">{submitError}</p>}
         </form>
       </div>
 
-      {verificationModalOpen && (
-        <div className="verification-modal-backdrop" onClick={() => setVerificationModalOpen(false)}>
-          <div className="verification-modal" onClick={(event) => event.stopPropagation()}>
-            <div className="section-label">/ EMAIL VERIFICATION</div>
-            <h3>Enter the code we sent</h3>
-            <p>We sent a 6-digit verification code to <strong>{data.email}</strong>.</p>
-            {isDemoVerification && <p className="demo-verification-note">Demo mode is active. Use this code: <strong>{verificationCode}</strong></p>}
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              value={verificationInput}
-              onChange={(event) => setVerificationInput(event.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="123456"
-              aria-label="Verification code"
-            />
-            {verificationMessage && <p className="verification-message">{verificationMessage}</p>}
-            <div className="verification-actions">
-              <button type="button" className="back-button" onClick={() => setVerificationModalOpen(false)}>Cancel</button>
-              <button type="button" className="primary" onClick={verifyEmailCode} disabled={isCheckingCode}>
-                {isCheckingCode ? 'Verifying...' : 'Verify'} <span>↗</span>
-              </button>
-            </div>
-            <button type="button" className="text-link" onClick={requestEmailVerification} disabled={isSendingCode}>
-              {isSendingCode ? 'Sending...' : 'Resend code'}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

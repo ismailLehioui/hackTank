@@ -29,7 +29,7 @@ export function Faq() {
 
         <aside className="contact-card">
           <h3>Talk to us</h3>
-          <a href="mailto:hello@hacktank.tn"><Mail size={16} /> hello@hacktank.tn</a>
+          <a href="mailto:hello@hacktank.tn"><Mail size={16} /> jci.sousse.ong@gmail.com</a>
           <a href="tel:+21600000000"><Phone size={16} /> +216 00 000 000</a>
           <span><MapPin size={16} /> {EVENT.location}</span>
           <Link className="primary" to="/register">Enter the Tank </Link>

@@ -42,7 +42,6 @@ function loadDraft(): RegistrationData {
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const EMAIL_VERIFICATION_ENABLED = false
 
 export function Register() {
   const [step, setStep] = useState(1)
@@ -212,7 +211,7 @@ export function Register() {
   const goNext = async () => {
     if (!validateStep()) return
 
-    if (step === 1 && EMAIL_VERIFICATION_ENABLED) {
+    if (step === 1) {
       if (!emailVerified) {
         await requestEmailVerification()
         return

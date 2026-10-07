@@ -48,6 +48,7 @@ export function Register() {
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [paymentEmailError, setPaymentEmailError] = useState('')
   const [data, setData] = useState<RegistrationData>(loadDraft)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [verificationCode, setVerificationCode] = useState('')
@@ -233,8 +234,27 @@ export function Register() {
     }
     setIsSubmitting(true)
     setSubmitError('')
+    setPaymentEmailError('')
     try {
       await submitRegistration(data)
+
+      try {
+        const response = await fetch('/api/send-payment-instructions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentMethod: data.paymentMethod,
+            recipients: [data.email, ...data.teamMembers.map((member) => member.email)],
+          }),
+        })
+        const payload = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          throw new Error(payload?.error || 'Unable to send payment instructions.')
+        }
+      } catch {
+        setPaymentEmailError('Your registration was saved, but we could not email the payment instructions. Please contact the organizers.')
+      }
+
       localStorage.removeItem(STORAGE_KEY + '-draft')
       setSubmitted(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -254,7 +274,8 @@ export function Register() {
           <div className="success-mark"><Check size={34} /></div>
           <div className="section-label">/ YOU’RE IN THE TANK</div>
           <h1>Now go build<br /><em>something bold.</em></h1>
-          <p>Your application is received, {data.firstName || 'builder'}. It will remain pending until your payment is verified. We’ll email <b>{data.email}</b> with the next steps.</p>
+          <p>Your application is received, {data.firstName || 'builder'}. It will remain pending until your payment is verified. Payment instructions were sent to the email addresses provided.</p>
+          {paymentEmailError && <p className="form-submit-error" role="alert">{paymentEmailError}</p>}
           <div className="success-actions">
             <Link className="primary" to="/">Back to home <span>↗</span></Link>
           </div>

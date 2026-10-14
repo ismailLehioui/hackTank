@@ -43,6 +43,29 @@ function loadDraft(): RegistrationData {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+function getSubmitErrorMessage(error: unknown): string {
+  const fallback = 'Unable to submit your application. Please try again.'
+  const value: Record<string, unknown> = error instanceof Error
+    ? { message: error.message }
+    : error && typeof error === 'object' ? error as Record<string, unknown> : {}
+  const message = typeof value?.message === 'string' ? value.message : ''
+  const code = typeof value?.code === 'string' ? value.code : ''
+  const details = typeof value?.details === 'string' ? value.details : ''
+  const diagnostic = `${message} ${details}`
+
+  if (code === '23505' || /duplicate key value violates unique constraint/i.test(message)) {
+    if (/participants_email_key|\(email\)/i.test(diagnostic)) {
+      return 'An email address in this application is already registered. Check the team leader and teammate email addresses.'
+    }
+    if (/teams_team_name_key|\(team_name\)/i.test(diagnostic)) {
+      return 'This team name is already registered. Please choose another name.'
+    }
+    return 'Some registration information is already in use. Check the team name and all email addresses.'
+  }
+
+  return message || fallback
+}
+
 export function Register() {
   const [step, setStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
@@ -112,11 +135,20 @@ export function Register() {
       if (!data.paymentMethod) next.paymentMethod = 'Choose a payment method'
       if (!data.paymentCommitment) next.paymentCommitment = 'Please confirm your payment commitment'
 
+      const emailCounts = new Map<string, number>()
+      ;[data.email, ...data.teamMembers.map((member) => member.email)]
+        .filter((email) => emailPattern.test(email.trim()))
+        .forEach((email) => {
+          const normalizedEmail = email.trim().toLowerCase()
+          emailCounts.set(normalizedEmail, (emailCounts.get(normalizedEmail) ?? 0) + 1)
+        })
+
       data.teamMembers.forEach((member, index) => {
         const baseKey = `member-${index}`
         if (!member.firstName.trim()) next[`${baseKey}-firstName`] = 'Required'
         if (!member.lastName.trim()) next[`${baseKey}-lastName`] = 'Required'
         if (!emailPattern.test(member.email)) next[`${baseKey}-email`] = 'Enter a valid email'
+        else if ((emailCounts.get(member.email.trim().toLowerCase()) ?? 0) > 1) next[`${baseKey}-email`] = 'This email is used more than once in the team'
         if (!member.phone.trim()) next[`${baseKey}-phone`] = 'Required'
         if (!member.age || Number(member.age) < 15 || Number(member.age) > 99) next[`${baseKey}-age`] = 'Enter a valid age'
         if (member.profileType === 'student') {
@@ -159,7 +191,7 @@ export function Register() {
       setSubmitted(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to submit your application. Please try again.'
+      const message = getSubmitErrorMessage(error)
       setSubmitError(message.includes('duplicate') ? 'This email is already registered.' : message)
     } finally {
       setIsSubmitting(false)

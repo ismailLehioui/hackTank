@@ -63,6 +63,7 @@ export function Footer() {
       <div className="footer-bottom">
         <span>© 2026 {EVENT.org} — {EVENT.name}</span>
         <span>Made for the bold.</span>
+        <Link to="/terms">Terms & Conditions</Link>
       </div>
     </footer>
   )

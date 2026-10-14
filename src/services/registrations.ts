@@ -59,8 +59,8 @@ export type SiteSettings = {
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   id: null,
-  contact_email: "hello@hacktank.tn",
-  contact_phone: "+216 00 000 000",
+  contact_email: "jci.sousse.ong@gmail.com",
+  contact_phone: "+216 53316176",
   linkedin_url: "https://www.linkedin.com/company/jci-sousse/home/",
   instagram_url: "https://www.instagram.com/jcisousse/",
   hero_image_url: null,

@@ -8,6 +8,7 @@ import { Register } from './pages/Register'
 import { Admin } from './pages/Admin'
 import { Jury } from './pages/Jury'
 import { Team } from './pages/Team'
+import { Terms } from './pages/Terms'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/sharks" element={<Sharks />} />
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/faq" element={<Faq />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="*" element={<Home />} />
       </Route>
     </Routes>

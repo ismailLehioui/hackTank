@@ -62,7 +62,7 @@ export function Home() {
           <div className="hero-heading-space" aria-hidden="true" />
           <p className="hero-text">A 24-hour build sprint where bold teams turn raw ideas into ventures — then pitch them live to a panel of sharks.</p>
           <div className="hero-actions">
-            <Link className="primary" to="/register">Enter the Tank 
+            <Link className="nav-cta desktop-only" to="/register">Enter the Tank 
             {/* <span>↗</span> */}
             </Link>
             <a className="text-link" href="#concept">How it works <span>↓</span></a>

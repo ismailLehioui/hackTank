@@ -108,7 +108,7 @@ export function Terms() {
             <p>
               <strong>Organizer:</strong> JCI Sousse<br />
               <strong>Email:</strong> jci.sousse.ong@gmail.com<br />
-              <strong>Website:</strong> <a href="https://hack-tank.vercel.app/" target="_blank" rel="noreferrer">https://hack-tank-sand.vercel.app/</a>
+              <strong>Website:</strong> <a href="https://hack-tank.vercel.app/" target="_blank" rel="noreferrer">https://hack-tank.vercel.app/</a>
             </p>
           </div>
         </div>
